@@ -11,19 +11,86 @@ import { BarcodeTrackingAdvancedOverlayView } from 'scandit-react-native-datacap
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 
 import { styles } from './styles';
+import { getBarCodeMapping } from './utils';
+import { useItemsByGtins } from '@/state/remote-pep-direct/use-items-by-gtins';
+import { useProductByGtins } from '@/state/remote-dato/use-product-by-gtins';
+import { client } from '@/client';
+import { ApolloProvider } from '@apollo/client';
+import { mergeProductData } from '@/utils/merge-product-data';
+import { formatPrice } from '@/utils/price';
 
 // The component must be registered and must either have a static and instance property `moduleName` by
 // which it's registered, or must inherit from `BarcodeTrackingAdvancedOverlayView`.
 // See: `AppRegistry.registerComponent(ARView.moduleName, () => ARView)` in index.js
-export class ARViewCompetitor extends BarcodeTrackingAdvancedOverlayView {
+export class ARView extends BarcodeTrackingAdvancedOverlayView {
+  render() {
+    const { barcodeData } = this.props;
+    return (
+      <ApolloProvider client={client}>
+      <ARViewUi barCode={barcodeData} />
+      </ApolloProvider>
+    );
+  }
+}
+
+
+const ARViewUi = ({barCode}: {barCode: string}) => {
+  const mappedProduct = getBarCodeMapping(barCode);
+  const {
+    pepItems,
+    loading,
+  } = useItemsByGtins(
+    mappedProduct.type === 'pepsico' ?
+      [mappedProduct.productId] :
+      mappedProduct.pepsicoProductIds
+  );
+  const { data: datoProducts, loading: datoLoading } = useProductByGtins(
+    mappedProduct.type === 'pepsico' ?
+      [mappedProduct.productId] :
+      mappedProduct.pepsicoProductIds
+  );
+
+  if (loading || datoLoading) {
+    return (
+      <ARViewLoading />
+    );
+  }
+  const merged = mergeProductData(datoProducts.allProducts, pepItems);
+
+  if(mappedProduct.type === 'non-pepsico') {
+    return (
+      <ARViewCompetitor />
+    );
+  }
+
+  const product = merged.find(product => product.gtin === mappedProduct.productId);
+  return (
+    <View>
+    <View style={styles.arBubbleContainer}>
+      <View style={styles.arBubbleImageContainer}>
+        <Image source={{
+          uri: product?.productImages?.[0]?.url || ''
+        }} style={styles.arBubbleImage} />
+      </View>
+      <View style={styles.arBubbleContent}>
+        <Text style={styles.arBubbleHeader} numberOfLines={2}>{product?.title || "Unknown Product"}</Text>
+        <Text style={styles.arBubbleInfo}>{ formatPrice(product?.price || 0)}</Text>
+      </View>
+      <View style={styles.addToCartImageContainer}>
+        <Image source={require('./cart-plus-svgrepo-com.png')} style={styles.addToCartImage} />
+      </View>
+    </View>
+  </View>  )
+}
+
+class ARViewCompetitor extends React.Component {
   state = { showBarcodeData: false };
 
   render() {
     const { stock } = this.props;
-    const { showBarcodeData } = this.state;
 
     return (
-      <TouchableWithoutFeedback onPress={() => this.setState({ showBarcodeData: !showBarcodeData })}>
+      <TouchableWithoutFeedback>
         <View style={styles.lookingForBetterValueBubbleContentContainer}>
           <View style={styles.lookingForBetterValueBubbleContent}>
             <Text style={styles.arBubbleHeader} numberOfLines={2}>Looking for better value?</Text>
@@ -37,42 +104,8 @@ export class ARViewCompetitor extends BarcodeTrackingAdvancedOverlayView {
   }
 }
 
-
-export class ARView extends BarcodeTrackingAdvancedOverlayView {
-  state = { showBarcodeData: false };
-
+ class ARViewLoading extends React.Component  {
   render() {
-    const { stock } = this.props;
-    const { showBarcodeData } = this.state;
-
-    return (
-      <TouchableWithoutFeedback onPress={() => this.setState({ showBarcodeData: !showBarcodeData })}>
-        <View style={styles.arBubbleContainer}>
-          <View style={styles.arBubbleImageContainer}>
-            <Image source={{
-              uri: 'https://www.datocms-assets.com/101859/1744642611-chews_5ct_fruit-punch_producttile_2680x3344_a2.png?auto=format&fit=max&w=640'
-            }} style={styles.arBubbleImage} />
-          </View>
-          <View style={styles.arBubbleContent}>
-            <Text style={styles.arBubbleHeader} numberOfLines={2}>Gatorade Energy Chews</Text>
-            <Text style={styles.arBubbleInfo}>$19.98</Text>
-          </View>
-          <View style={styles.addToCartImageContainer}>
-            <Image source={require('./cart-plus-svgrepo-com.png')} style={styles.addToCartImage} />
-          </View>
-        </View>
-      </TouchableWithoutFeedback>
-    );
-  }
-}
-
-export class ARViewLoading extends BarcodeTrackingAdvancedOverlayView {
-  state = { showBarcodeData: false };
-
-  render() {
-    const { stock } = this.props;
-    const { showBarcodeData } = this.state;
-
     return (
       <View style={styles.arBubbleContainer}>
         <SkeletonPlaceholder borderRadius={8} width={200} height={50}>

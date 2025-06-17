@@ -1,0 +1,5563 @@
+schema {
+  query: RootQueryType
+  mutation: RootMutationType
+}
+
+directive @oneOf on INPUT_OBJECT
+
+"""Exposes a URL that specifies the behavior of this scalar."""
+directive @specifiedBy(
+  """The URL that specifies the behavior of this scalar."""
+  url: String!
+) on SCALAR
+
+type Account {
+  appId: UUID4
+  credits: [Credit!]!
+  id: UUID4
+  invoicing: Invoicing
+  managedAddressesOnly: Boolean
+  name: String
+  sapLink: SapLink
+  submittedOrders(pagination: PaginationInput = {limit: 10, page: 1}): SubmittedOrderPayload
+  tags: [String!]
+  type: String!
+}
+
+type AccountVerificationLocalization {
+  body: String!
+  buttonText: String!
+  contactSupportText: String!
+  emailSentText: String!
+  heading: String!
+  invalidLinkText: String!
+  tokenExpiredText: String!
+  verifySuccessText: String!
+}
+
+type Activity {
+  activityId: String!
+  dateEnd: DateTime
+  dateStart: DateTime
+  description: String!
+  displayName: String
+  extraData: Json
+  freqCap: Int
+  freqPeriodId: Int
+  freqPeriodName: String
+  imgUrl: String
+  internalName: String
+  numPoints: Int!
+}
+
+type ActivityAwarded {
+  awarded: Boolean
+  numPoints: Int
+}
+
+input ActivityCreditByPepdirectActivityIdInput {
+  activityDate: DateTime!
+  extraData: Json
+  pepdirectActivityId: String!
+}
+
+input ActivityCreditInput {
+  activityDate: DateTime!
+  activityId: String!
+  extraData: Json
+}
+
+input AddItemWithUniqueCustomizationsInput {
+  analyticsDetails: Json
+  customizations: Json!
+  id: UUID4
+  itemId: UUID4!
+  merchandiseId: String
+  quantity: Int!
+  subscriptionIntervalInDays: Int
+}
+
+type Address {
+  city: String!
+  company: String
+  countryCode: String!
+  firstName: String!
+  id: UUID4!
+  isDefault: Boolean
+  isRemovable: Boolean
+  lastName: String!
+  line1: String!
+  line2: String
+  nickname: String
+  phoneNumber: String
+  specialInstructions: String
+  state: String
+  taxId: String
+  type: String!
+  user: User!
+  zip: String!
+}
+
+type AddressConfig {
+  addressNickname: Boolean
+  addressSpecialInstructions: Boolean
+  companyName: Boolean
+  countriesAllowed: [CountriesAllowed!]!
+  isStateRequired: Boolean
+  note: String
+  phoneNumberCountryCodesAllowed: [PhoneNumberCountryCodesAllowed]
+  requireValidation: ValidationRequirement!
+  statesConfig: [StatesConfig!]!
+  taxId: Boolean
+}
+
+type AddressVerificationLocalization {
+  addressErrorBoldText: String!
+  addressErrorText: String!
+  editManuallyText: String!
+  editOnlyText: String!
+  editOrSuggestionText: String!
+  enteredAddressText: String!
+  invalidZipCodeText: String!
+  keepEnteredButtonText: String!
+  reviewAddressText: String!
+  suggestedAddressText: String!
+  titleText: String!
+  useSuggestedButtonText: String!
+  zipErrorBoldText: String!
+  zipErrorText: String!
+}
+
+type AiDesign {
+  appId: UUID4!
+  colors: [AiDesignColor]!
+  featuredWeight: Int!
+  generatedByTenant: Boolean!
+  id: UUID4!
+  imageUrls: Json!
+  insertedAt: DateTime!
+  item: Item!
+  promptAiEnhanced: String
+  promptUser: String
+  traits: [AiDesignTrait]!
+  userId: UUID4
+}
+
+type AiDesignColor {
+  hexValue: String!
+  name: String!
+}
+
+input AiDesignColorInput {
+  hexValue: String!
+  name: String!
+}
+
+input AiDesignFilterInput {
+  colors: [AiDesignColorInput!] = []
+  ids: [UUID4!] = []
+
+  """
+  Used to narrow down designs returned based on who created them. Defaults to [TENANT]
+  """
+  sources: [SourceTypes!] = [TENANT]
+  traits: [AiDesignTraitInput!] = []
+}
+
+type AiDesignResult {
+  items: [AiDesign!]
+  pagination: PaginationData!
+}
+
+input AiDesignSortingInput {
+  sortBy: SortableFields!
+  sortOrder: SortableMethods!
+}
+
+type AiDesignTrait {
+  id: String!
+}
+
+input AiDesignTraitInput {
+  """ID of Dato trait record"""
+  id: String!
+}
+
+type AllowedState {
+  id: String!
+  name: String!
+}
+
+type AnalyticsConfig {
+  gtm: GtmConfig
+  projectId: String
+  writeKey: String
+}
+
+type ApplePayCard {
+  billingAddress: BraintreeAddress
+  bin: String!
+  cardType: String!
+  cardholderName: String!
+  countryOfIssuance: String!
+  createdAt: String!
+  customerId: String!
+  default: Boolean!
+  expirationMonth: String!
+  expirationYear: String!
+  expired: Boolean!
+  imageUrl: String!
+  issuingBank: String!
+  last4: String!
+  paymentInstrumentName: String!
+  productId: String!
+  sourceDescription: String!
+  subscriptions: [String]
+  token: String!
+  updatedAt: String!
+}
+
+type BasicBehaviour {
+  name: BehaviourEnum!
+}
+
+type Bazaarvoice {
+  encryptedEmail: String
+  encryptionKeyId: String
+}
+
+"""Behaviour which may or may not have attributes"""
+union Behaviour = BasicBehaviour | BogoBehaviour | DynamicBundlesBehaviour | TieredBehaviour
+
+enum BehaviourEnum {
+  """
+  Basic discount logic, discounts all matching items by configured amount.
+  """
+  BASIC
+
+  """Buy one (or many) get one (or many) at the specified percent off"""
+  BOGO
+
+  """
+  Dynamic Bundles discount logic, discounts matching items designated with the campaign_id
+  """
+  DYNAMIC_BUNDLES
+
+  """
+  Tiered discount logic, discounts matching items according to a tier structure.
+  """
+  TIERED
+}
+
+type BogoAttributes {
+  applyAmount: Int!
+  triggerPoint: Int!
+}
+
+type BogoBehaviour {
+  attributes: BogoAttributes!
+  name: BehaviourEnum!
+}
+
+type BotProtection {
+  active: Boolean!
+  provider: BotProtectionProvider
+  siteKey: BotProtectionSiteKey
+}
+
+enum BotProtectionProvider {
+  GOOGLE_RECAPTCHA
+}
+
+type BotProtectionSiteKey {
+  android: String!
+  ios: String!
+  web: String!
+}
+
+type BraintreeAddress {
+  company: String
+  countryCodeAlpha2: String
+  countryCodeAlpha3: String
+  countryCodeNumeric: String
+  countryName: String
+  createdAt: String
+  extendedAddress: String
+  firstName: String
+  lastName: String
+  locality: String
+  postalCode: String
+  region: String
+  streetAddress: String
+  updatedAt: String
+}
+
+type BrandConfig {
+  audience: String!
+  cdnHost: String
+  companyId: String
+  contactUrl: String
+  copyright: String!
+  customCss: String
+  customTexts: [CustomText!]!
+  customizations: BrandConfigCustomizations!
+  email: String
+  logoUrl: String!
+  optInTextLocalized: String!
+  supportEmail: String
+  title: String!
+  trackingFonts: [BrandConfigTrackingFonts]
+  yearsAgeGate: Int
+}
+
+type BrandConfigCustomizations {
+  account: BrandConfigCustomizationsAccount
+  contacts: [BrandConfigCustomizationsContact!]!
+  css: [BrandConfigCustomizationsCss!]!
+  fonts: [BrandConfigCustomizationsFont!]!
+  images: [BrandConfigCustomizationsImage!]!
+  links: [BrandConfigCustomizationsLink!]!
+}
+
+type BrandConfigCustomizationsAccount {
+  profilePageTitle: String
+  signinPageTitle: String
+  signupPageTitle: String
+  valueprops: [BrandConfigCustomizationsAccountValueprops!]!
+}
+
+type BrandConfigCustomizationsAccountValueprops {
+  imgUrl: String
+  text: String
+}
+
+type BrandConfigCustomizationsContact {
+  city: String
+  countryCode: String
+  line1: String
+  line2: String
+  phoneNumber: String
+  showCountry: Boolean
+  state: String
+  type: String!
+  zip: String
+}
+
+type BrandConfigCustomizationsCss {
+  overrides: [BrandConfigCustomizationsCssOverride!]!
+  selector: String!
+}
+
+type BrandConfigCustomizationsCssOverride {
+  name: String!
+  value: String!
+}
+
+type BrandConfigCustomizationsFont {
+  meta: [BrandConfigCustomizationsFontMeta!]
+  name: String!
+  style: String
+  urls: [BrandConfigCustomizationsFontSources!]!
+  weight: String
+}
+
+type BrandConfigCustomizationsFontMeta {
+  key: String!
+  value: String!
+}
+
+type BrandConfigCustomizationsFontSources {
+  format: String
+  local: String
+  url: String
+}
+
+type BrandConfigCustomizationsImage {
+  alt: String
+  name: String!
+  src: String!
+}
+
+type BrandConfigCustomizationsLink {
+  location: String!
+  newTab: Boolean!
+  position: Int!
+  title: String!
+  url: String!
+}
+
+type BrandConfigTrackingFonts {
+  font: String!
+  isTrackingRequired: Boolean!
+  resource: String!
+}
+
+type BundleComponent {
+  componentPriceItems: [DynamicBundleItem]
+  imgUrl: String
+  name: String!
+  qtyType: String!
+  requiredQty: Int!
+  subscriptionOption: String
+  subtitle: String
+  title: String
+}
+
+type BundleItem {
+  imgUrl: String
+  title: String
+}
+
+"""
+DynamicBundle are composed of items (CartItem or LineItem) which contain DynamicBundle
+metadata in a cart. A BundleLineItem is a convenience struct that will create one item
+that is an accumulation of all the items which are part of a DynamicBundle.
+"""
+type BundleLineItem {
+  """components of the bundle other than the primary component"""
+  bundleComponents: [BundleComponent]!
+
+  """The id of the DynamicBundle"""
+  bundleId: UUID4!
+
+  """The cart reference of the DynamicBundle"""
+  cartBundleReference: Int!
+
+  """Will contain information of the discount for the DynamicBundle"""
+  discounts: [LineItemDiscount!]!
+
+  """The DynamicBundle the items belong to"""
+  dynamicBundle: DynamicBundle!
+
+  """A list of items that are NOT associated with the primary component"""
+  dynamicBundleItems: [DynamicBundleItem!]
+
+  """This is the image from the primary component"""
+  imgUrl: String
+
+  """aggregated gtin item notifications"""
+  itemNotifications: [String!]!
+
+  """
+  This will always the same as subtotal because DynamicBundles are quantity of 1
+  """
+  perUnitPrice: Int!
+
+  """A list of items that are associated with the primary component"""
+  primaryBundleItems: [DynamicBundleItem!]
+
+  """The primary component of the DynamicBundle"""
+  primaryComponent: BundleComponent!
+
+  """
+  This is the quantity of all the items that are part of the DynamicBundle
+  """
+  quantity: Int!
+
+  """
+  This is the cumulative strikethrough price of all the items in the DynamicBundle
+  """
+  strikethroughUnitPrice: Int
+
+  """
+  This is the total of the items after the discount for the DynamicBundle is applied
+  """
+  subtotal: Int!
+
+  """The title of the primary component for the DynamicBundle"""
+  title: String!
+}
+
+input CalculateOrderDiscountsInput {
+  orderId: UUID4
+  price: PriceInput
+}
+
+type CalculateOrderDiscountsPayload {
+  order: Order
+}
+
+type CalculateOrderPayload {
+  order: Order
+}
+
+input CancelOrderSubscriptionInput {
+  cancelReason: String!
+
+  """ID of Order Subscription"""
+  id: UUID4!
+}
+
+type Capabilities {
+  signUp: CapabilitiesSignUp!
+  termsAndConditions: CapabilitiesTermsAndConditions
+}
+
+"""
+The sign up capability informs consumers of the API if the Tenant
+allows users to sign up via the Secure Portal.
+"""
+type CapabilitiesSignUp {
+  enabled: Boolean!
+}
+
+"""
+The capability to request accepting most recent version of T&C by user.
+"""
+type CapabilitiesTermsAndConditions {
+  lastVersionUpdatedAt: DateTime
+}
+
+type Cart {
+  appId: UUID4!
+  dynamicBundles: Json
+  id: UUID4!
+  isGift: Boolean
+  items: [CartItem!]!
+  lineItems: [CartItemsAndBundleItems!]!
+  loyaltyData: LoyaltyData
+
+  """
+  list of loyalty rewards the user has applied to their cart. Update via applyLoyaltyRewardToCart mutation.
+  """
+  loyaltyRewards: [LoyaltyReward]
+
+  """
+  the calculated shipping (most tenants have a threshold after which shipping is free)
+  """
+  shipping: Int!
+
+  """SubTotal of the order calculated by adding all line item subtotals."""
+  subtotal: Int!
+
+  """
+  Total of the order calculated by adding all line item totals and shipping. This does NOT include tax calculations
+  """
+  total: Int!
+  user: User
+  vendorConfig: Tenant!
+}
+
+input CartBundleComponentInput {
+  componentId: UUID4!
+  items: [CartBundleItemInput!]
+}
+
+input CartBundleItemInput {
+  analyticsDetails: Json
+  customizations: Json
+  itemId: UUID4!
+  quantity: Int!
+  subscriptionIntervalInDays: Int
+}
+
+input CartDynamicBundleInput {
+  bundleId: UUID4!
+  components: [CartBundleComponentInput!]
+  id: UUID4
+}
+
+input CartExactDynamicBundleInput {
+  analyticsDetails: Json
+  bundleId: UUID4
+  bundleTag: String
+  id: UUID4
+}
+
+type CartItem {
+  analyticsDetails: Json
+  customizations: Json
+  discounts: [LineItemDiscount!]!
+  dynamicBundle: Json
+  id: UUID4!
+  item: Item!
+  merchandise: Merchandise
+
+  """
+  The discounted price of the item as an individual unit (rounded up, except for
+  promo-code discounts, which are not adjusted).
+  """
+  perUnitPrice: Int!
+  quantity: Int!
+
+  """
+  The original price of the item as an individual unit (either the compare_at_price or or non-discounted price).
+  """
+  strikethroughUnitPrice: Int
+  subscriptionIntervalInDays: Int
+
+  """
+  calculated by subtracting the discount_total from the items base_price *
+  quantity (except for promo-code discounts, which are not included)
+  """
+  subtotal: Int!
+}
+
+input CartItemInput {
+  analyticsDetails: Json
+  customizations: Json
+  id: UUID4
+  itemId: UUID4!
+  merchandiseId: String
+  quantity: Int!
+  subscriptionIntervalInDays: Int
+}
+
+union CartItemsAndBundleItems = BundleLineItem | CartItem
+
+input CartRemoveDynamicBundleInput {
+  cartBundleReference: Int!
+  id: UUID4!
+}
+
+type Category {
+  appId: UUID4!
+  level1: String
+  level2: String
+  level3: String
+}
+
+input ChangeUserPasswordInput {
+  currentPassword: String!
+  password: String!
+}
+
+type Checkout {
+  paymentOptions: TenantPaymentOptions
+  shippingOptions: TenantShippingOptions
+  showCouponCodeCta: Boolean
+  vatInclusivePricing: Boolean
+  version: String
+}
+
+type CheckoutBreadcrumbsLocalization {
+  address: String!
+  payment: String!
+  review: String!
+  shipping: String!
+}
+
+type CheckoutCouponCodeLocalizations {
+  addCouponButtonText: String!
+  applyCouponButtonText: String!
+  couponLabel: String!
+  couponPlaceholderText: String!
+  removeCouponButtonText: String!
+}
+
+type CheckoutErrorsLocalizations {
+  discount: DiscountLocalizations
+  genericErrorMsg: String!
+  guestCartContainsSubscription: GuestCartContainsSubscriptionLocalizations
+  insufficientLoyaltyBalance: InsufficientLoyaltyBalanceLocalizations
+  invalidLoyaltyReward: InvalidLoyaltyRewardLocalizations
+  lowStock: LowStockLocalizations
+  minimumPurchaseAmount: String!
+  minimumPurchaseQuantity: String!
+  outOfStock: OutOfStockLocalizations
+  paymentFailureErrorText: String!
+  paymentNotAccepted: String!
+  purchaseQtyLimit: PurchaseQtyLimitLocalizations
+  unableToUsePoBox: String!
+  unverifiedEmail: String!
+  virtualItemsInCart: VirtualItemsInCartLocalizations
+  zipCodeRestriction: ZipCodeRestrictionLocalizations
+}
+
+type CheckoutGiftFormLocalizations {
+  emailFieldLabel: String!
+  gifteeFieldLabel: String!
+  infoText: String!
+  messageFieldLabel: String!
+  sendAsGiftText: String!
+  shippingAddressHeadingText: String!
+}
+
+"""
+Returns a map of all checkout elements and their translations.
+
+Example:
+    ```
+    query {
+      localization {
+        checkout {
+          breadcrumbs {
+            shipping
+          }
+        }
+      }
+    }
+    ```
+"""
+type CheckoutLocalization {
+  breadcrumbs: CheckoutBreadcrumbsLocalization
+  couponCode: CheckoutCouponCodeLocalizations
+  errors: CheckoutErrorsLocalizations
+  giftForm: CheckoutGiftFormLocalizations
+  orderDetails: CheckoutOrderDetailsLocalizations
+  orderStatusPage: CheckoutOrderStatusPageLocalizations
+  orderSummary: CheckoutOrderSummaryLocalizations
+  pageTitlesInHead: CheckoutPageTitlesLocalization
+  paymentStep: CheckoutPaymentStepLocalizations
+  rdd: CheckoutRddLocalizations
+  reviewStep: CheckoutReviewStepLocalizations
+  shippingMethodStep: CheckoutShippingMethodStepLocalizations
+  shippingStep: CheckoutShippingStepLocalizations
+}
+
+type CheckoutOrderDetailsLocalizations {
+  billingSameAsShippingText: String!
+  cardholderNameText: String!
+  expiresText: String!
+  invoiceTermsText: String!
+  invoiceText: String!
+  poNumberText: String!
+  shippingMethodText: String!
+}
+
+type CheckoutOrderStatusPageLocalizations {
+  continueShoppingButtonText: String!
+  headingText: String!
+  notFoundMsg: String!
+  orderConfirmationShipmentText: String!
+  orderDateText: String!
+  orderDetailsHeadingText: String!
+  orderDetailsNote: String!
+  orderDetailsText: String!
+  paymentHeadingText: String!
+  printButtonText: String!
+  shippingHeadingText: String!
+}
+
+type CheckoutOrderSummaryLocalizations {
+  bulkDiscountText: String!
+  bundleDiscountText: String!
+  bundleItemDefaultText: String!
+  cartHeadingText: String!
+  freeShipLabel: String!
+  itemPlural: String!
+  itemSingular: String!
+  regulatoryTaxLabel: String!
+  salesTaxLabel: String!
+  shippingLabel: String!
+  subtotalLabel: String!
+  totalLabel: String!
+  whatsIncludedText: String!
+  yourOrderText: String!
+}
+
+type CheckoutPageTitlesLocalization {
+  checkout: String!
+  status: String!
+}
+
+type CheckoutPaymentStepLocalizations {
+  addCardHeadingText: String!
+  addPaymentButtonText: String!
+  addPaymentHeadingText: String!
+  billingAddressHeadingText: String!
+  billingSameAsShippingText: String!
+  continueToReviewButtonText: String!
+  headingText: String!
+  sectionHeadingText: String!
+  shippingAddressHeadingText: String!
+}
+
+type CheckoutRddLocalizations {
+  changeDateText: String!
+  headingText: String!
+  needOrderSoonerText: String!
+  noteText: String!
+  selectDateText: String!
+  yourRequestedDateText: String!
+}
+
+type CheckoutReviewStepLocalizations {
+  agreeToTermsText: String!
+  editButtonText: String!
+  emailNote: String!
+  giftEmailNote: String!
+  giftMessageNote: String!
+  giftShippingHeadingText: String!
+  headingText: String!
+  paymentHeadingText: String!
+  shippingHeadingText: String!
+  submitOrderButtonText: String!
+}
+
+type CheckoutShippingMethodStepLocalizations {
+  freeText: String!
+  headingText: String!
+  selectShippingMethodText: String!
+}
+
+type CheckoutShippingStepLocalizations {
+  addAddressButtonText: String!
+  addAddressHeadingText: String!
+  additionalPhoneNumberLabel: String!
+  addressHeadingText: String!
+  contactNoteText: String!
+  continueToPaymentButtonText: String!
+  continueToShippingMethodButtonText: String!
+  savedAddressHeadingText: String!
+  shipAlertText: String!
+  shippingHeadingText: String!
+}
+
+type CodeSubmitted {
+  numPoints: Int
+}
+
+type Component {
+  discount: Discount
+  id: UUID4!
+  items: [Item!]
+  name: String!
+  qtyType: String!
+  requiredQty: Int!
+  subscriptionOption: SubscriptionOption!
+}
+
+type ComponentsLocalization {
+  addressVerification: AddressVerificationLocalization
+  customNotFound: CustomNotFoundLocalization
+  errorModal: ErrorModalLocalization
+  exchangeReturnByDate: ExchangeReturnByDateLocalization
+  footer: FooterLocalization
+  orderProcessing: OrderProcessing
+  price: PriceLocalization
+}
+
+type ContactConfig {
+  shippingAddressConfig: AddressConfig!
+}
+
+type ContactInfo {
+  bazaarvoice: Bazaarvoice
+  email: String
+  phone: String
+  shippingAddress: EmbeddedAddress
+  shippingMethod: EmbeddedShippingMethod
+  user: User
+  userString: String
+  username: String
+}
+
+input ContactInfoInput {
+  email: String
+  emailOptIn: Boolean
+  phone: String
+  shippingAddress: EmbeddedAddressInput
+  username: String
+}
+
+type CountriesAllowed {
+  id: String!
+  name: String!
+}
+
+"""Response when an order is created during checkout"""
+type CreatedOrder {
+  appId: UUID4
+  cart: Cart
+  compositeId: String
+  contactInfo: ContactInfo
+
+  """User's own internal id for the order"""
+  customerPo: String
+  gifteeEmail: String
+  gifteeMessage: String
+  giftorName: String
+  id: UUID4!
+  isGift: Boolean
+  location: LatLong
+  orderSubscription: OrderSubscription
+  paymentRequest: PaymentRequest
+  price: Price!
+  requestedDeliveryDate: Date
+  status: String
+  submissionUid: String
+  user: User
+}
+
+input CreatePaymentMethodInput {
+  default: Boolean
+  deviceData: String!
+  nonce: String!
+}
+
+input CreateRegistrationRecordInput {
+  customData: Json
+  emailOptIn: Boolean
+  gtin: String!
+  purchaseDate: Date!
+  purchaseLocation: String
+  utmData: UtmDataInput
+}
+
+type Credit {
+  activeFrom: Date!
+  activeUntil: Date
+  availableAmount: Int!
+  frozen: Boolean!
+  id: UUID4!
+  notes: String
+  pendingAmount: Int!
+  settledAmount: Int!
+  spentAmount: Int!
+  status: String!
+  type: String!
+}
+
+type CreditCard {
+  billingAddress: BraintreeAddress
+  cardType: String!
+  cardholderName: String
+  createdAt: String!
+  default: Boolean!
+  expirationMonth: String!
+  expirationYear: String!
+  isRemovable: Boolean
+  last4: String!
+  token: String!
+  uniqueNumberIdentifier: String!
+}
+
+type CreditCardTooltipLocalization {
+  cardsWith3DigitsNote: String!
+  cardsWith3DigitsText: String!
+  cardsWith4DigitsNote: String!
+  cardsWith4DigitsText: String!
+  cvv3DigitAlt: String!
+  cvv4DigitAlt: String!
+  headingText: String!
+}
+
+input CustomDataInput {
+  customData: Json!
+}
+
+"""Used for item customizations maps"""
+union Customization = GatoradeIdBottle | GatoradeTowel | LegacyCustomization
+
+type CustomNotFoundLocalization {
+  cartButtonText: String!
+  headingText: String!
+  homeButtonText: String!
+  subHeadingText: String!
+}
+
+type CustomText {
+  body: [String!]!
+  links: [CustomTextLink!]!
+  location: String!
+  position: Int
+  type: String!
+}
+
+type CustomTextLink {
+  displayValue: String!
+  key: String!
+  linkValue: String!
+  type: String!
+}
+
+"""
+The `Date` scalar type represents a date. The Date appears in a JSON
+response as an ISO8601 formatted string, without a time component.
+"""
+scalar Date
+
+"""
+The `DateTime` scalar type represents a date and time in the UTC
+timezone. The DateTime appears in a JSON response as an ISO8601 formatted
+string, including UTC timezone ("Z"). The parsed date and time string will
+be converted to UTC if there is an offset.
+"""
+scalar DateTime
+
+"""
+The `Decimal` scalar type represents signed double-precision fractional
+values parsed by the `Decimal` library. The Decimal appears in a JSON
+response as a string to preserve precision.
+"""
+scalar Decimal
+
+input DeleteCreditCardInput {
+  token: String!
+}
+
+input DeletePaymentMethodInput {
+  token: String!
+}
+
+type Discount {
+  activeFrom: DateTime!
+  activeUntil: DateTime
+  amount: Int
+  appId: UUID4
+  behaviour: Behaviour!
+  enabled: Boolean
+  id: UUID4!
+  isPercent: Boolean
+  isPromoCodeRequired: Boolean
+  limit: Int
+  promoCode: String
+  type: DiscountType
+  typeDependentValue: String
+  usage: Int
+}
+
+type DiscountLocalizations {
+  discountCannotApplyToSubscription: String!
+  discountExceedsSubtotal: String!
+  discountHeadingText: String!
+  discountNotFound: String!
+  discountNoteText: String!
+  discountPromoCodeRequiresEmail: String!
+  discountPromoCodeRequiresEmailOrLogin: String!
+  discountTooLarge: String!
+}
+
+type Discounts {
+  discounts: [Discount!]
+}
+
+input DiscountsInput {
+  activeFrom: DateTime!
+  activeUntil: DateTime
+  amount: Int
+  appId: UUID4
+  enabled: Boolean
+  id: UUID4!
+  isPercent: Boolean
+  isPromoCodeRequired: Boolean
+  limit: Int
+  promoCode: String
+  type: String
+  typeDependentValue: String
+  usage: Int
+}
+
+enum DiscountType {
+  """The discount is specific to a bundle"""
+  DYNAMIC_BUNDLE
+
+  """Currently unused"""
+  GIFT_CARD
+
+  """The discount is specific to a single item"""
+  ITEM
+
+  """The discount is specific to the discount's itemSet"""
+  ITEM_SET
+
+  """The discount is specific to a subscription"""
+  SUBSCRIPTION
+
+  """The discount is specific to an entire tenant"""
+  TENANT
+
+  """The discount is specific to a specific vendor"""
+  VENDOR
+}
+
+type DynamicBundle {
+  appId: UUID4!
+  components: [Component!]
+  discount: Discount
+  discountPrice: Int!
+  id: UUID4!
+  inventoryQty: Int
+  minRetailPrice: Int!
+  name: String!
+  primaryComponent: Component!
+  tag: String!
+}
+
+type DynamicBundleItem {
+  analyticsDetails: Json
+
+  """A list of customizations the item associated contains"""
+  customizations: [Customization!]
+  discounts: [LineItemDiscount!]
+  item: Item!
+  itemId: UUID4!
+  quantity: Int!
+  subscriptionIntervalInDays: Int
+}
+
+type DynamicBundlesBehaviour {
+  name: BehaviourEnum!
+}
+
+input EmailNewsletterSignupInput {
+  email: String!
+  firstName: String!
+  lastName: String!
+  source: SourceType = DEFAULT
+}
+
+type EmailOptInLocalization {
+  body: String!
+  defaultLabelText: String!
+  privacyPolicyLinkText: String!
+  termsOfUseLinkText: String!
+}
+
+input EmailSspInput {
+  businessAddress: String!
+  businessName: String!
+  businessType: String!
+  city: String!
+  emailField: String!
+  existingCustomer: Boolean!
+  firstName: String!
+  lastName: String!
+  manageAndOrder: String!
+  numberOfUsers: String!
+  phoneNumber: String!
+  state: String
+  zip: String!
+}
+
+type EmailSspResponse {
+  status: String!
+}
+
+type EmbeddedAddress {
+  city: String
+  company: String
+  countryCode: String
+  firstName: String
+  lastName: String
+  line1: String
+  line2: String
+  nickname: String
+  phoneNumber: String
+  specialInstructions: String
+  state: String
+  taxId: String
+  validated: String
+  zip: String
+}
+
+input EmbeddedAddressInput {
+  city: String
+  company: String
+  countryCode: String
+  firstName: String
+  lastName: String
+  line1: String
+  line2: String
+  nickname: String
+  phoneNumber: String
+  specialInstructions: String
+  state: String
+  taxId: String
+  validated: Boolean
+  zip: String
+}
+
+type EmbeddedCategory {
+  level1: String
+  level2: String
+  level3: String
+}
+
+type EmbeddedDiscount {
+  amount: Int
+  isPercent: Boolean
+}
+
+type EmbeddedItem {
+  awaitingImportCorrection: Boolean
+  brandName: String
+  bundleOnly: Boolean
+  categories: EmbeddedCategory
+  color: String
+  compareAtPrice: Int
+  containerType: String
+  countryCity: String
+  description: String
+  designerBio: String
+  dimensionUnits: String
+  dimensions: String
+  fluidOzPerPack: Decimal
+  gasExchangeInfo: EmbeddedItemGasExchangeInfo
+  height: String
+  id: UUID4
+  imgUrl: String
+  importId: UUID4
+  inventoryQty: Int
+  isApproved: Boolean
+  isDairyFree: Boolean
+  isFairTrade: Boolean
+  isGlutenFree: Boolean
+  isGmoFree: Boolean
+  isKosher: Boolean
+  isOrganic: String
+  isOutOfStock: Boolean
+  isPending: Boolean
+  isVegan: Boolean
+  isWheatFree: Boolean
+  isYeastFree: Boolean
+  isbn: String
+  length: String
+  material: String
+  meltRisk: Boolean
+  minOrderQty: Int
+  onMarketplace: Boolean
+  pointsPrice: Int
+  price: Int
+  primaryCategoryPriority: Int
+  productPacks: Int
+  productsPerPack: Int
+  returnsPolicy: String
+  secondaryCategoryPriority: Int
+  shippingInfo: String
+  slug: String
+  slugHash: String
+  subscriptionMetadata: EmbeddedItemSubscriptionMetadata
+  subscriptionOnly: Boolean
+  tags: String
+  taxCodeId: String
+  title: String
+  upc: String
+  vendorId: UUID4
+  virtual: Boolean
+  weightOz: String
+  width: String
+}
+
+type EmbeddedItemGasExchangeInfo {
+  enabled: Boolean!
+  missingCylinder: Item
+  missingCylinderId: UUID4
+}
+
+type EmbeddedItemSubscriptionMetadata {
+  discount: EmbeddedDiscount
+  isSubscribable: Boolean!
+  subscriptionPrice: Int
+}
+
+type EmbeddedShippingMethod {
+  code: String
+  phone: String
+  title: String
+}
+
+"""
+Uses custom oneOf directive.  Input is one of the following fields.
+We can associate a different source id with each
+of the input types for Salesforce.
+
+Noting here that one tenant uses the same input but wants a different
+source id according to where the pop up is displayed for the user
+to enter information.
+"""
+input EngagementSignupInput {
+  identifier1: Newsletter1SignupInput
+  identifier2: OutOfStockInput
+  identifier3: Newsletter2SignupInput
+  identifier4: Newsletter3SignupInput
+  identifier5: SmsInput
+  identifier6: SmsInputLoggedUser
+  identifier7: CustomDataInput
+  identifier8: StockNotificationInput
+}
+
+type ErrorModalLocalization {
+  errorHeadingText: String!
+  okText: String!
+  visitOurLinkForAssistanceText: String!
+}
+
+type ExchangeReturnByDateLocalization {
+  exchangeText: String!
+  returnByText: String!
+}
+
+type FeatureFlag {
+  enabled: Boolean!
+  name: String!
+}
+
+type FieldMeasure {
+  eqv: Int
+  eunit: String
+  label: String
+  qty: Int
+  value: String
+}
+
+input FindAddressInput {
+  container: String
+  limit: String
+  text: String!
+}
+
+type FooterLocalization {
+  allRightsReserved: String!
+}
+
+type FormsAccountLocalization {
+  firstNameLabel: String!
+  lastNameLabel: String!
+}
+
+type FormsAddressLocalization {
+  autocompletePlaceholderText: String!
+  cardholderNameLabel: String!
+  cityLabel: String!
+  companyLabel: String!
+  countryLabel: String!
+  emailLabel: String!
+  firstNameLabel: String!
+  isDefaultLabel: String!
+  lastNameLabel: String!
+  line1Label: String!
+  line2Label: String!
+  manuallyEnterAddressText: String!
+  nicknameLabel: String!
+  phoneLabel: String!
+  phoneNumberLabel: String!
+  regionText: String!
+  requiredFieldsText: String!
+  requiredText: String!
+  specialInstructionsLabel: String!
+  stateLabel: String!
+  taxIdLabel: String!
+  zipLabel: String!
+}
+
+type FormsCreditCardLocalization {
+  cardNumberLabel: String!
+  cardSavedForGasExchangeNote: String!
+  cardSavedForSubsNote: String!
+  cardholderNameLabel: String!
+  cvvLabel: String!
+  cvvTooltip: CreditCardTooltipLocalization
+  expirationDateLabel: String!
+  saveCardForLaterText: String!
+  securityNote: String!
+}
+
+type FormsForgotPasswordLocalization {
+  backToLoginText: String!
+  contactLinkContentText: String!
+  contactLinkText: String!
+  emailLabelText: String!
+  formDescriptionText: String!
+  headingText: String!
+  submitButtonText: String!
+  submittedText: String!
+}
+
+type FormsLocalization {
+  account: FormsAccountLocalization
+  address: FormsAddressLocalization
+  creditCard: FormsCreditCardLocalization
+  forgotPassword: FormsForgotPasswordLocalization
+  resetPassword: FormsResetPasswordLocalization
+  signIn: FormsSignInLocalization
+  signup: FormsSignupLocalization
+  tos: FormsTosLocalization
+  validation: FormsValidationLocalization
+}
+
+type FormsResetPasswordLocalization {
+  contactLinkContentText: String!
+  contactLinkText: String!
+  headingText: String!
+  passwordInputLabelText: String!
+  requestNewLinkContentText: String!
+  requestNewLinkText: String!
+  resetTokenDefaultErrorText: String!
+  resetTokenExpiredErrorText: String!
+  resetTokenIdErrorText: String!
+  resetTokenMismatchErrorText: String!
+  resetTokenNotFoundErrorText: String!
+  resetTokenUnableToDecodeErrorText: String!
+  submitText: String!
+}
+
+type FormsSignInLocalization {
+  accountLockedErrorText: String!
+  emailInputPlaceholderText: String!
+  forgotPasswordButtonText: String!
+  genericErrorText: String!
+  headingDefaultText: String!
+  headingText: String!
+  loginButtonText: String!
+  passwordInputPlaceholderText: String!
+  signUpButtonText: String!
+  signUpDefaultHeadingText: String!
+  signUpHeadingText: String!
+}
+
+type FormsSignupLocalization {
+  accountLogoAltText: String!
+  ageRequirementErrorText: String!
+  birthdayLabelText: String!
+  createAccountPageHeadingText: String!
+  dayLabelText: String!
+  emailLabelText: String!
+  emailOptIn: EmailOptInLocalization
+  emailPlaceholderText: String!
+  errorResetPasswordLinkText: String!
+  errorText: String!
+  firstNameLabelText: String!
+  firstNamePlaceholderText: String!
+  headingText: String!
+  lastNameLabelText: String!
+  lastNamePlaceholderText: String!
+  monthLabelText: String!
+  passwordLabelText: String!
+  passwordPlaceholderText: String!
+  submitText: String!
+  yearLabelText: String!
+}
+
+type FormsTosLocalization {
+  body: String!
+  errorText: String!
+  tosLinkText: String!
+}
+
+type FormsValidationLocalization {
+  companyRequiredWithTaxIdErrorText: String!
+  dayRequiredErrorText: String!
+  emailRequiredErrorText: String!
+  fieldRequiredErrorText: String!
+  invalidDateErrorText: String!
+  invalidPasswordErrorText: String!
+  invalidPhoneErrorText: String!
+  invalidTaxIdErrorText: String!
+  invalidTaxIdLengthErrorText: String!
+  monthRequiredErrorText: String!
+  newPasswordRequiredErrorText: String!
+  passwordRequiredErrorText: String!
+  requiredErrorText: String!
+  signupPasswordRequiredErrorText: String!
+  taxIdRequiredWithCompanyErrorText: String!
+  wrongEmailErrorText: String!
+  yearRequiredErrorText: String!
+}
+
+type FoundAddress {
+  description: String
+  highlight: String
+  id: String
+  type: String
+  value: String
+}
+
+type FoundItems {
+  items: [FoundAddress!]
+}
+
+type Fulfillment {
+  externalFulfillmentId: String
+  id: UUID4!
+  insertedAt: DateTime
+  items: [FulfillmentItem!]!
+  orderId: UUID4
+  status: StatusLabels
+  taxServiceUpdatedAt: NaiveDateTime
+  tracking: TrackingNumber
+  updatedAt: DateTime
+  warehouseCode: String
+}
+
+type FulfillmentItem {
+  insertedAt: DateTime!
+  item: Item
+  quantity: Int
+  subscriptionIntervalInDays: Int
+  updatedAt: DateTime!
+}
+
+type GatoradeIdBottle {
+  bottleLidFeatureText: String
+
+  """Values: 'blank', 'diy_strip', or 'text'"""
+  bottleLidFeatureType: String
+  bottleLidFontColor: String
+  bottleLidFontColorValue: String
+  bottleLidFontType: String
+  bottleLidLogo: String
+  bottleLidLogoImage: String
+  bottleLidNumber: String
+
+  """Values: 'logo' or 'number'"""
+  bottleLidNumberType: String
+  bottleLidPattern: String
+  bottleLidPrimaryColor: String
+  bottleLidPrintFileUrl: String
+  bottleLidSecondaryColor: String
+  bottleLidStrokeColor: String
+  bottleLidStrokeColorValue: String
+  bottleLidStrokeWeight: String
+  bottleLidThumbnailImage: String
+  bottleSideFeatureLogo: String
+  bottleSideFeatureText: String
+
+  """Values: 'text' or 'logo'"""
+  bottleSideFeatureType: String
+  bottleSideFontColor: String
+  bottleSideFontColorValue: String
+  bottleSideFontType: String
+  bottleSideLogoUrl: String
+  bottleSideMascotAccentColor: String
+  bottleSideMascotAccentColorValue: String
+  bottleSideMascotBaseColor: String
+  bottleSideMascotBaseColorValue: String
+  bottleSideMascotName: String
+  bottleSideMascotNonCustomColor: String
+  bottleSideMascotNonCustomColorValue: String
+  bottleSidePattern: String
+  bottleSidePatternImage: String
+  bottleSidePrimaryColor: String
+  bottleSidePrimaryColorValue: String
+  bottleSidePrintFileUrl: String
+  bottleSideSecondaryColor: String
+  bottleSideSecondaryColorValue: String
+  bottleSideStrokeColor: String
+  bottleSideStrokeColorValue: String
+  bottleSideStrokeWeight: String
+  bottleSideThumbnailImage: String
+  description: String
+  enhancerVariantGtin: String
+}
+
+type GatoradeTowel {
+  text: String
+  towelFeatureLogo: String
+  towelFeatureText: String
+
+  """Values: 'text' or 'logo'"""
+  towelFeatureType: String
+  towelFontColor: String
+  towelFontColorValue: String
+  towelFontType: String
+  towelLogoUrl: String
+  towelMascotAccentColor: String
+  towelMascotAccentColorValue: String
+  towelMascotBaseColor: String
+  towelMascotBaseColorValue: String
+  towelMascotName: String
+  towelMascotNonCustomColor: String
+  towelMascotNonCustomColorValue: String
+  towelPattern: String
+  towelPatternImage: String
+  towelPrimaryColor: String
+  towelPrimaryColorValue: String
+  towelPrintFileUrl: String
+  towelSecondaryColor: String
+  towelSecondaryColorValue: String
+  towelStrokeColor: String
+  towelStrokeColorValue: String
+  towelStrokeWeight: String
+  towelTextLogoState: String
+  towelThumbnailImage: String
+}
+
+type GiftCardConfig {
+  giftCardsEnabled: Boolean
+}
+
+type GiftConfig {
+  giftEmailConfig: GiftEmailConfig
+  giftingEnabled: Boolean
+}
+
+type GiftEmailConfig {
+  centralImageUrl: String
+  footerCopy: String
+  headline: String
+}
+
+type GtmConfig {
+  auth: String
+  containerId: String
+  preview: String
+}
+
+type GuestCartContainsSubscriptionLocalizations {
+  cartText: String!
+  itemHeadingText: String!
+  itemNoteText: String!
+}
+
+type InsufficientLoyaltyBalanceLocalizations {
+  itemHeadingText: String!
+  itemNoteText: String!
+}
+
+type InvalidLoyaltyRewardLocalizations {
+  itemHeadingText: String!
+  itemNoteText: String!
+}
+
+type InvoicedAddress {
+  city: String!
+  company: String
+  countryCode: String!
+  firstName: String
+  id: UUID4!
+  lastName: String
+  line1: String!
+  line2: String
+  phoneNumber: String!
+  state: String
+  zip: String!
+}
+
+type Invoicing {
+  addresses: [InvoicedAddress!]!
+  enabled: Boolean
+}
+
+input IsGiftInput {
+  id: UUID4!
+  isGift: Boolean!
+}
+
+type Item {
+  appId: UUID4!
+  brandName: String
+  bundleOnly: Boolean
+  caloriesPerPack: Decimal
+  categories: [Category]
+  color: String
+  compareAtPrice: Int!
+  containerType: String
+  countryCity: String
+  description: String
+  designerBio: String
+  dimensionUnits: String
+  dimensions: String
+  discounts: [Discount]
+  dynamicBundles: [DynamicBundle!]
+  fluidOzPerPack: Decimal
+  gasExchangeInfo: ItemGasExchangeInfo
+  gtin: String!
+  height: String
+  id: UUID4!
+  imgUrl: String
+  imgVariantUrls: [ProductImageVariant]
+  inventoryQty: Int
+  isArchived: Boolean
+  isDairyFree: Boolean
+  isFairTrade: Boolean
+  isGlutenFree: Boolean
+  isGmoFree: Boolean
+  isKosher: Boolean
+  isOrganic: String
+  isOutOfStock: Boolean
+  isPending: Boolean!
+  isVegan: Boolean
+  isWheatFree: Boolean
+  isYeastFree: Boolean
+  isbn: String
+
+  """virtual field populated with exiting notification for a gtin"""
+  itemNotifications: [String]
+  length: String
+  material: String
+  meltRisk: Boolean
+  minOrderQty: Int
+  nutritionData: NutritionData
+  onMarketplace: Boolean
+  price: Int
+  primaryCategoryPriority: Int
+  productPacks: Int
+  productsPerPack: Int
+  recommendedItems: [Item!]!
+  returnsPolicy: String
+  secondaryCategoryPriority: Int
+  shippingInfo: String
+  slug: String
+  slugHash: String @deprecated(reason: "Please use `slug` going forward.")
+  stories: [Story]
+  subItems: [BundleItem] @deprecated(reason: "This field will no longer return any sub_items")
+  subscriptionMetadata: ItemSubscriptionMetadata
+  subscriptionOnly: Boolean
+  sugarGramsPerPack: Decimal
+  tags: [String]
+  taxCodeId: String
+  title: String
+  upc: String @deprecated(reason: "This field is deprecated, use `Gtin` in place of `Upc`")
+  variantOptions: [ProductVariant]
+  vendorConfig: Tenant!
+  virtual: Boolean
+  weightOz: String
+  width: String
+}
+
+type ItemGasExchangeInfo {
+  enabled: Boolean!
+  missingCylinder: Item
+  missingCylinderId: UUID4
+}
+
+input ItemsInput {
+  basePrice: Int
+  compareAtPrice: Int
+  discountAmount: Int
+  discountId: UUID4
+  itemId: UUID4
+  quantity: Int
+  taxAmount: Int
+}
+
+type ItemsPayload {
+  items: [Item!]!
+  pagination: PaginationData!
+}
+
+type ItemSubscriptionMetadata {
+  discount: Discount
+  id: UUID4!
+  isSubscribable: Boolean!
+  subscriptionPrice: Int!
+}
+
+"""`Json` scalar type represented as UTF-8 character sequences."""
+scalar Json
+
+type LatLong {
+  lat: Float!
+  long: Float!
+}
+
+type LegacyCustomization {
+  bottleCode: String
+  number: String
+  patternId: String
+  text: String
+  thumbnailImage: String
+}
+
+"""Discount information as it applies to the individual line item"""
+type LineItemDiscount {
+  amount: Int!
+  category: LineItemDiscountCategory!
+  discountId: UUID4!
+  type: LineItemDiscountType!
+}
+
+enum LineItemDiscountCategory {
+  BASIC
+  BASIC_PROMO_CODE
+  DYNAMIC_BUNDLE
+  SUBSCRIPTION
+  TIERED
+  TIERED_PROMO_CODE
+}
+
+enum LineItemDiscountType {
+  FLAT
+  PERCENT
+}
+
+type Localization {
+  checkout: CheckoutLocalization
+  components: ComponentsLocalization
+  currentLocale: String!
+  defaultLocale: String!
+  forms: FormsLocalization
+  locale: String! @deprecated(reason: "`locale` has been deprecated in favor of `defaultLocale`")
+  portal: PortalLocalization
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+input LoginUserInput {
+  email: String!
+  password: String!
+}
+
+type LowStockLocalizations {
+  cartText: String!
+  itemHeadingText: String!
+  itemNoteText: String!
+}
+
+type LoyaltyConfig {
+  loyaltyProgramActive: Boolean!
+}
+
+"""
+loyalty data aggregation at Cart and Price level. Will contain total points
+redeemed, total amount of dollars, and points earned
+"""
+type LoyaltyData {
+  totalAmount: Int
+  totalEarnedPoints: Int
+  totalPoints: Int
+}
+
+input LoyaltyItemInput {
+  itemId: UUID4!
+  quantity: Int!
+}
+
+input LoyaltyPurchaseInput {
+  loyaltyItems: [LoyaltyItemInput]!
+  rewardId: String!
+  rewardQuantity: Int!
+  shippingAddressId: UUID4!
+}
+
+"""loyalty reward the user has applied to their cart."""
+type LoyaltyReward {
+  code: String!
+  quantity: Int!
+  totalAmount: Int!
+  totalPoints: Int!
+}
+
+input LoyaltyRewardInput {
+  code: String!
+  quantity: Int!
+}
+
+input LoyaltyRewardInputByPepdirectRewardId {
+  pepdirectRewardId: String!
+  quantity: Int!
+}
+
+input MailingAddressInput {
+  city: String!
+  phoneNumber: String
+  postalCode: String!
+  state: String
+  streetAddress1: String!
+  streetAddress2: String
+}
+
+type Merchandise {
+  description: String
+  id: UUID4!
+  tag: String
+  title: String
+}
+
+type Module {
+  body: String
+  coverPhotoUrl: String
+  cta1: String
+  cta2: String
+  cta3: String
+  id: UUID4!
+  insertedAt: DateTime!
+  isApproved: Boolean
+  itemOrdering: [ModuleItem!]!
+  publishedAt: DateTime
+  publishedTime: String
+  story: Story
+  storySlug: String!
+  thumbnailItems: [ModuleThumbnailItem!]!
+  title1: String
+  title2: String
+  title3: String
+  type: String!
+  updatedAt: DateTime!
+  urlOverride: String
+}
+
+type ModuleItem {
+  item: Item
+  module: Module
+  order: Int
+}
+
+type ModuleThumbnailItem {
+  id: String
+  imgUrl: String
+  position: Int
+  title: String
+}
+
+"""
+The `Naive DateTime` scalar type represents a naive date and time without
+timezone. The DateTime appears in a JSON response as an ISO8601 formatted
+string.
+"""
+scalar NaiveDateTime
+
+input Newsletter1SignupInput {
+  email: String!
+  firstName: String
+  lastName: String
+}
+
+input Newsletter2SignupInput {
+  email: String!
+  firstName: String!
+  lastName: String!
+}
+
+input Newsletter3SignupInput {
+  dateOfBirth: Date!
+  email: String!
+  emailOptIn: Boolean = true
+  firstName: String!
+  lastName: String!
+  phoneNumber: String
+  smsOptIn: Boolean = false
+  sourceId: String
+}
+
+type NutritionData {
+  code: String
+  ingredientsTextEn: String
+  nutrients: [NutritionField]
+}
+
+type NutritionField {
+  derivation: String
+  group: String
+  measures: [FieldMeasure]
+  name: String
+  unit: String
+  value: String
+}
+
+input OrangeTheoryInquiryInput {
+  city: String!
+  comments: String
+  email: String!
+  firstName: String!
+  lastName: String!
+  marketingSupportType: String!
+  state: String!
+  streetAddressOne: String!
+  streetAddressTwo: String
+  studioName: String!
+  zip: String!
+}
+
+type Order {
+  appId: UUID4
+  cart: Cart
+
+  """
+  Composite Order Ids will be in the format `customer_po-internal_order_id`. If
+  the customer PO field is null, it'll just be the `internal_order_id`
+  """
+  compositeId: String @deprecated(reason: "The display_name field now represents the user visible order identifier/label\nwhich is either explicitly set in the record or computed via the composite\norder id logic. This obviates the need for the composite_id field.\n")
+  contactInfo: ContactInfo!
+
+  """
+  The display name represents the user visible order label which identifies
+  the order to an end-user. This is either explicitly set in the
+  display_name_override column on the order or is computed as a composite of
+  the purchase order id (if any) and the internal order id.
+  """
+  displayName: String
+  externalOrderId: String @deprecated(reason: "The concept of internal/external order ids is\nbeing removed and this will be replaced by a\nsingle field.\n")
+  gifteeEmail: String
+  gifteeMessage: String
+  giftorName: String
+  id: UUID4!
+  internalOrderId: Int! @deprecated(reason: "The concept of internal/external order ids is\nbeing removed and this will be replaced by a\nsingle field.\n")
+
+  """
+  Some orders are managed or "owned" by a different system. These orders are
+  sometimes imported into this system for tracking and reporting purposes but
+  don't have active workflows or fulfillment processes hooked up. This allows
+  these orders to be displayed with special notices in the UI.
+  """
+  isExternalOrder: Boolean
+  isGift: Boolean
+  location: LatLong
+  paymentRequest: PaymentRequest
+  price: Price!
+  status: String
+  user: User
+}
+
+input OrderInput {
+  gifteeEmail: String
+  gifteeMessage: String
+  giftorName: String
+  isGift: Boolean
+}
+
+type OrderProcessing {
+  headingText: String!
+  subHeadingText: String!
+}
+
+type OrderSubscription {
+  address: Address!
+  cancelReason: String @deprecated(reason: "Please use status/status_reason")
+  canceledAt: Date @deprecated(reason: "Please use status_updated_at")
+  id: UUID4!
+  initialOrderDate: DateTime
+  insertedAt: DateTime!
+  intervalInDays: Int!
+  lastOrderAttempt: DateTime
+  lastSuccessfulOrder: Date! @deprecated(reason: "Please use last_successful_order_date")
+  lastSuccessfulOrderDate: Date!
+  nextDeliveryDate: Date! @deprecated(reason: "Please use next_order_creation_date")
+  nextOrderCreationDates: [Date]!
+  orderSubscriptionItems: [OrderSubscriptionItem!]!
+  originatingOrder: SubmittedOrder
+  paymentInfo: PaymentInfo!
+  price: SubscriptionPrice!
+  status: OrderSubscriptionStatusNames!
+  statusReason: String
+  statusUpdatedAt: DateTime
+  title: String!
+  updatedAt: DateTime!
+  user: User!
+  vendorConfig: Tenant!
+}
+
+type OrderSubscriptionItem {
+  orderSubscription: OrderSubscription!
+  priceItem: PriceItem!
+  quantity: Int
+}
+
+enum OrderSubscriptionRelationshipNames {
+  """Order that was a direct result of a subscription execution"""
+  CHILD
+
+  """Order with no relationship to any subscriptions"""
+  NONE
+
+  """
+  Order that resulted in subscriptions being made (priceItem had > 0 subscription_interval_in_days values)
+  """
+  PARENT
+}
+
+type OrderSubscriptionsPayload {
+  orderSubscriptions: [OrderSubscription!]!
+}
+
+enum OrderSubscriptionStatusNames {
+  """Subscription is active and in valid state to fulfill"""
+  ACTIVE
+
+  """Subscription is canceled for reason stated in `status_reason`"""
+  CANCELED
+
+  """Subscription is paused for reason stated in `status_reason`"""
+  PAUSED
+}
+
+input OutOfStockInput {
+  email: String!
+  emailOptIn: Boolean!
+  gtin: String!
+}
+
+type OutOfStockLocalizations {
+  cartText: String!
+  itemHeadingText: String!
+  itemNoteText: String!
+}
+
+type Pagination {
+  hasNextPage: Boolean
+  hasPrevPage: Boolean
+  nextPageLink: String
+  pages: Int
+  prevPageLink: String
+  total: Int
+}
+
+type PaginationData {
+  count: Int!
+  page: Int!
+  total: Int!
+  totalPages: Int!
+}
+
+input PaginationInput {
+  limit: Int!
+  page: Int!
+}
+
+"""
+Takes advantage of the oneOf custom directive that
+enforces fields based on the base key for the input
+type.
+"""
+input PartnerInquiryInput {
+  orangeTheory: OrangeTheoryInquiryInput
+}
+
+type PasswordRequirement {
+  msg: String!
+  satisfied: Boolean!
+}
+
+type PasswordRequirementDoubleCondition {
+  bodyText: String!
+  boldText1: String!
+  boldText2: String!
+}
+
+type PasswordRequirementSingleCondition {
+  bodyText: String!
+  boldText: String!
+}
+
+type PaymentClientTokenPayload {
+  token: String!
+}
+
+type PaymentConfig {
+  billingAddressConfig: AddressConfig!
+  descriptor: String
+  paymentTypes: [PaymentType!]!
+  publicPaymentToken: String
+}
+
+type PaymentInfo {
+  cardExpirationDate: String
+  cardholderName: String
+  email: String
+  externalId: String
+  last4: String
+  paymentMethod: PaymentMethodNames
+  paymentType: String
+  paypalEmail: String
+  uniqueNumberIdentifier: String
+}
+
+"""object for holding a single default payment method"""
+union PaymentMethod = ApplePayCard | CreditCard | PaypalAccount
+
+enum PaymentMethodEnum {
+  CREDIT_CARD
+  PAYPAL
+}
+
+enum PaymentMethodNames {
+  """Apple Pay Card"""
+  APPLE_PAY
+
+  """Credit Card"""
+  CREDIT_CARD
+
+  """Paypal Account"""
+  PAYPAL
+}
+
+"""object defined to hold the different payment methods"""
+type PaymentMethods {
+  applePayCards: [ApplePayCard!]
+  creditCards: [CreditCard!]
+  default: PaymentMethod
+  paypalAccounts: [PaypalAccount!]
+}
+
+input PaymentOptionsInput {
+  deviceData: String
+  default: Boolean
+  nonce: String
+  paymentMethod: PaymentMethodEnum
+  token: String
+}
+
+type PaymentRequest {
+  billingAddress: EmbeddedAddress
+  isBillingEqualShipping: Boolean
+  paymentMethod: String
+}
+
+input PaymentRequestInput {
+  billingAddress: EmbeddedAddressInput
+  deviceData: String
+  isBillingEqualShipping: Boolean
+  isDefault: Boolean
+  paymentMethod: String
+  paymentToken: String
+  saveCardForLater: Boolean
+  token: String
+}
+
+type PaymentType {
+  brandImgUrl: String!
+  id: Int!
+  name: String!
+}
+
+type PaypalAccount {
+  billingAgreementId: String!
+  createdAt: String!
+  customerId: String!
+  default: Boolean!
+  email: String!
+  imageUrl: String!
+  isChannelInitated: Boolean
+  isRemovable: Boolean!
+  payerInfo: String
+  subscriptions: [String]
+  token: String!
+  updatedAt: String!
+}
+
+type PhoneNumberCountryCodesAllowed {
+  code: String!
+  country: String!
+  length: Int!
+}
+
+type PortalAccountPageLocalization {
+  activeAccountHeadingText: String!
+  addressesHeadingText: String!
+  defaultTitleText: String!
+  emailHeadingText: String!
+  nameHeadingText: String!
+  nameUpdateButtonText: String!
+  nameUpdateCancelButtonText: String!
+  nameUpdateSubmitButtonText: String!
+  passwordChangeButtonText: String!
+  passwordHeadingText: String!
+  paymentsHeadingText: String!
+}
+
+type PortalAddressLocalization {
+  addHeadingText: String!
+  addSubmitButtonText: String!
+  cancelButtonText: String!
+  editHeadingText: String!
+  makeDefaultText: String!
+  updateSubmitButtonText: String!
+}
+
+type PortalAltsLocalization {
+  accountAltText: String!
+  shopLogoAltText: String!
+}
+
+type PortalBreadcrumbsLocalization {
+  account: String!
+  accountDetails: String!
+  addAddress: String!
+  addPayment: String!
+  changePassword: String!
+  editAddress: String!
+  exchange: String!
+  exchangeDetails: String!
+  machines: String!
+  notFound: String!
+  orders: String!
+  shippingAddresses: String!
+  subscriptions: String!
+}
+
+type PortalCardLocalization {
+  addAddressLabel: String!
+  addPaymentLabel: String!
+  allocationText: String!
+  creditCardNumberText: String!
+  currentLabel: String!
+  defaultAddressLabel: String!
+  defaultPaymentLabel: String!
+  deleteButtonText: String!
+  editButtonText: String!
+  makeDefaultButtonText: String!
+  numRemainingLabel: String!
+  selectLabel: String!
+  subscriptionAddressButtonText: String!
+  viewAllButtonText: String!
+}
+
+type PortalErrorsAddressVerificationLocalization {
+  checkoutSpecificConfirmSuggestedText: String!
+  confirmSuggestedAddressText: String!
+  confirmText: String!
+  doYouWantToProceedText: String!
+  editEnteredAddressText: String!
+  editText: String!
+  enteredAddressText: String!
+  goBackText: String!
+  invalidZipCodeText: String!
+  keepEnteredAddressText: String!
+  notAbleToVerifyShippingAddressText: String!
+  recommendChangesText: String!
+  shippingAddressText: String!
+  suggestedAddressText: String!
+  useSuggestedAddressText: String!
+  verifyText: String!
+}
+
+type PortalErrorsGeoblockLocalization {
+  apiError: String!
+  zipBlocked: String!
+}
+
+type PortalErrorsLocalization {
+  addressVerification: PortalErrorsAddressVerificationLocalization
+  geoBlock: PortalErrorsGeoblockLocalization
+}
+
+type PortalExchangeDetailsPageLocalization {
+  avoidDepositFeesWarningTextFractional: String!
+  avoidDepositFeesWarningTextMany: String!
+  avoidDepositFeesWarningTextPlural: String!
+  avoidDepositFeesWarningTextSingular: String!
+  daysLeftToReturnHeadingText: String!
+  daysLeftToReturnTextPlural: String!
+  daysLeftToReturnTextSingular: String!
+  depositFeeAddedAlertText: String!
+  depositFeeAddedText: String!
+  exchangeDetailsText: String!
+  expectedReturnDateText: String!
+  extendReturnDeadlineText: String!
+  missedReturnDateText: String!
+  notFoundMsg: String!
+  orderDetailsHeadingText: String!
+  orderedText: String!
+  paymentHeadingText: String!
+  returnByText: String!
+  returnDateExtendedText: String!
+  returnDateText: String!
+  returnedOnText: String!
+  returnedOutOfTotalText: String!
+  returnedText: String!
+  shippingHeadingText: String!
+  statusText: String!
+  yourOrderText: String!
+}
+
+type PortalExchangeListPageLocalization {
+  active: String!
+  closed: String!
+  cylinderText: String!
+  dueInDaysTextPlural: String!
+  dueInDaysTextSingular: String!
+  gasExchangeListTitle: String!
+  gasExchangePageListTitle: String!
+  orderDate: String!
+  returnByDate: String!
+  returnPastDue: String!
+  returnedDate: String!
+  viewDetails: String!
+}
+
+type PortalHeaderLocalization {
+  signOutLinkText: String!
+}
+
+"""
+Returns a map of all portal (my account) elements and their translations.
+
+Example:
+    ```
+    query {
+      localization {
+        portal {
+          accountPage {
+            nameHeadingText
+          }
+        }
+      }
+    }
+    ```
+"""
+type PortalLocalization {
+  accountPage: PortalAccountPageLocalization
+  accountVerification: AccountVerificationLocalization
+  address: PortalAddressLocalization
+  alts: PortalAltsLocalization
+  breadcrumbs: PortalBreadcrumbsLocalization
+  card: PortalCardLocalization
+  errors: PortalErrorsLocalization
+  exchangeDetailPage: PortalExchangeDetailsPageLocalization
+  exchangeList: PortalExchangeListPageLocalization
+  header: PortalHeaderLocalization
+  machinesPage: PortalMachinesPageLocalization
+  notAvailable: PortalNotAvailableLocalization
+  orderDetailPage: PortalOrderDetailPageLocalization
+  orderSummary: PortalOrderSummaryLocalization
+  ordersPage: PortalOrdersPageLocalization
+  pageTitlesInHead: PortalPageTitlesInHeadLocalization
+  password: PortalPasswordLocalization
+  payment: PortalPaymentLocalization
+  subscriptionDetailPage: PortalSubscriptionDetailPageLocalization
+  subscriptionsPage: PortalSubscriptionsPageLocalization
+}
+
+type PortalMachinesPageLocalization {
+  addMachinesText: String!
+  areYouSureDeleteThisMachineText: String!
+  cancelText: String!
+  confirmDeletionText: String!
+  deleteMachineText: String!
+  getGasText: String!
+  learnAboutSparklingWaterMakersText: String!
+  machineText: String!
+  machinesText: String!
+  registerYourMachineNowText: String!
+  troubleshootingGuideText: String!
+  unlockWarrantyText: String!
+  userManualText: String!
+  warrantyExpiredText: String!
+  warrantyExpiresText: String!
+  yesDeleteThisMachineText: String!
+}
+
+type PortalNotAvailableLocalization {
+  exchanges: String!
+  headingText: String!
+  linkContentText: String!
+  linkText: String!
+  naAbbreviationText: String!
+  orders: String!
+  subscriptions: String!
+}
+
+type PortalOrderDetailPageLocalization {
+  dateText: String!
+  invoiceNote: String!
+  notFoundErrorText: String!
+  orderIdHeadingText: String!
+  orderSummaryHeadingText: String!
+  paymentHeadingText: String!
+  printButtonText: String!
+  shippingAddressHeadingText: String!
+  trackingText: String!
+}
+
+type PortalOrdersPageLocalization {
+  dateHeadingText: String!
+  exchangeText: String!
+  orderIdHeadingText: String!
+  ordersHeadingText: String!
+  receiptButtonText: String!
+  reorderButtonText: String!
+  reorderErrorNote: String!
+  shippingAddressHeadingText: String!
+  totalHeadingText: String!
+}
+
+type PortalOrderSummaryLocalization {
+  estimatedFeeLabel: String!
+  estimatedTaxLabel: String!
+  feeLabel: String!
+  freeShipLabel: String!
+  shippingLabel: String!
+  subtotalLabel: String!
+  totalLabel: String!
+}
+
+type PortalPageTitlesInHeadLocalization {
+  verifyAccount: String!
+}
+
+type PortalPasswordLocalization {
+  backButtonText: String!
+  cancelButtonText: String!
+  changePasswordCancelButtonText: String!
+  changePasswordHeadingText: String!
+  changePasswordSubmitButtonText: String!
+  checkYourEmailContentText: String!
+  checkYourEmailHeadingText: String!
+  currentPasswordLabelText: String!
+  forgotPasswordHeadingText: String!
+  forgotPasswordHeadingWithTenantText: String!
+  minCharactersText: PasswordRequirementSingleCondition!
+  newPasswordLabelText: String!
+  oneSpecialCharText: PasswordRequirementSingleCondition!
+  oneUppercaseOneLowercaseAlphaText: PasswordRequirementDoubleCondition!
+  passwordUpdatedBannerText: String!
+  resetPasswordHeadingText: String!
+  resetPasswordHeadingWithTenantText: String!
+  twoNumericDigitsText: PasswordRequirementSingleCondition!
+  updatePasswordHeadingText: String!
+}
+
+type PortalPaymentLocalization {
+  addHeadingText: String!
+  billingSameAsShippingText: String!
+  cancelButtonText: String!
+  creditCardSelectorText: String!
+  makeDefaultText: String!
+  paypalSelectorText: String!
+  submitButtonText: String!
+}
+
+type PortalSubscriptionDetailPageLocalization {
+  addressHeadingText: String!
+  backButtonText: String!
+  cancelHeadingSubText: String!
+  cancelHeadingText: String!
+  cancelLabel: String!
+  cancelSubscriptionButtonText: String!
+  canceledText: String!
+  closeButtonText: String!
+  editAddressButtonText: String!
+  editPaymentButtonText: String!
+  intervalHeadingText: String!
+  intervalText: String!
+  manageSubscriptionLabel: String!
+  needToStartNewLabel: String!
+  nextDeliveryDateHeadingText: String!
+  nextShipmentDateText: String!
+  noLongerNeedLabel: String!
+  orderedAtHeadingText: String!
+  otherLabel: String!
+  pausedBannerText: String!
+  pausedText: String!
+  paymentHeadingText: String!
+  paymentUpdateButtonText: String!
+  paymentUpdateNeededText: String!
+  priceNoteText: String!
+  reasonForCancelingLabel: String!
+  reasonForCancelingPlaceholder: String!
+  renameLabel: String!
+  resumeLabel: String!
+  resumedBannerText: String!
+  shippingIssueLabel: String!
+  skipHeadingText: String!
+  skipLabel: String!
+  skipNextShipmentButtonText: String!
+  skippedBannerText: String!
+  skippedShipmentDateText: String!
+  subscriptionNotFoundText: String!
+  subscriptionText: String!
+}
+
+type PortalSubscriptionsPageLocalization {
+  actionRequiredLabel: String!
+  canceledLabel: String!
+  headingText: String!
+  intervalText: String!
+  nextDeliveryDateText: String!
+  noSubscriptionsFoundText: String!
+  pausedLabel: String!
+}
+
+type PotentialPoints {
+  totalPointsAwarded: Int!
+}
+
+input PotentialPointsInput {
+  items: [PotentialPointsItemInput]!
+}
+
+input PotentialPointsItemInput {
+  price: Int!
+  quantity: Int!
+  upc: String!
+}
+
+type Price {
+  discount: Int
+  discounts: [Discount!]!
+  dynamicBundles: Json
+  id: UUID4
+  items: [PriceItem!]!
+  priceDiscounts: [PriceDiscount!]!
+  shipping: Int
+  subtotal: Int
+  tax: Int
+  taxItems: [TaxItem!]!
+  total: Int
+  unclaimedTaxes: Int
+  updatedAt: DateTime
+}
+
+type PriceDiscount {
+  discount: Discount
+  price: Price
+}
+
+input PriceInput {
+  discount: Int
+  discounts: [DiscountsInput]
+  items: [ItemsInput]
+  shipping: Int
+  subtotal: Int
+  tax: Int
+  total: Int
+}
+
+type PriceItem {
+  basePrice: Int
+  compareAtPrice: Int
+
+  """Item in it's current state (may differ from embedded item)"""
+  currentItem: Item
+  customizations: Json
+  discountAmount: Int
+  id: UUID4!
+
+  """Item as it was when purchased"""
+  item: EmbeddedItem
+  itemId: UUID4
+  price: Price
+  quantity: Int
+  shippingAmount: Int @deprecated(reason: "This field should not be used nor relied upon")
+  subscriptionIntervalInDays: Int
+  taxAmount: Int
+  taxItems: [TaxItem!]!
+  unclaimedTaxes: Int
+}
+
+type PriceLocalization {
+  eachPriceText: String!
+  regularPriceText: String!
+}
+
+type ProductImageVariant {
+  item: Item
+  pos: Int
+  src: String
+}
+
+type ProductVariant {
+  item: Item
+  variant: Item
+  variantOptions: [ProductVariantOption]
+}
+
+type ProductVariantOption {
+  name: String
+  position: Int
+  productVariant: ProductVariant
+  value: String
+}
+
+type PurchaseQtyLimitLocalizations {
+  cartText: String!
+}
+
+type Question {
+  allowOther: Boolean
+  answerOptions: Json
+  displayOrder: Int
+  id: Int
+  questionType: String
+  required: Boolean
+  value: String
+}
+
+type QuestionResponse {
+  other: String
+  questionId: Int
+  selectedAnswers: [Int]
+  textAnswer: String
+}
+
+type ReceiptInfo {
+  dateSubmitted: DateTime
+  fileId: String
+  fileName: String
+  fileUrl: String
+  id: Int
+  scanResult: String
+  scanResultText: String
+}
+
+type ReceiptInfoHistory {
+  pagination: Pagination
+  receipts: [ReceiptInfo]
+}
+
+input RedeemRewardByPepdirectRewardIdInput {
+  pepdirectRewardId: String!
+  quantity: Int!
+}
+
+input RedeemRewardInput {
+  quantity: Int!
+  rewardId: String!
+}
+
+type Redemption {
+  categoryId: String
+  dateCreated: DateTime!
+  description: String
+  endingBalance: String!
+  extraData: Json
+  groupId: String
+  image: String
+  rewardId: String!
+  rewardTitle: String
+  totalPointsRedeemed: Int!
+}
+
+type RedemptionInfoHistory {
+  pagination: Pagination
+  redemptions: [Redemption]
+}
+
+type RegistrationRecord {
+  customData: Json
+  emailOptIn: Boolean
+  id: UUID4!
+  insertedAt: DateTime!
+  item: Item!
+  itemId: UUID4!
+  newUser: Boolean!
+  order: SubmittedOrder
+  orderId: UUID4
+  purchaseDate: Date
+  purchaseLocation: String!
+  registeredAt: DateTime!
+  source: String!
+  status: StatusType!
+  tenant: Tenant!
+  tenantId: UUID4!
+  updatedAt: DateTime!
+  user: User!
+  userId: UUID4!
+  utmData: UtmData
+  warrantyExpirationDate: Date
+}
+
+"""
+Inputs for requesting Password Reset for a User.
+
+The `state` field is used to pass information back to the browser when
+as User clicks on the password reset link in their email. The state is
+included as a query string appended to the URL. The value of `state` can
+be any string, as long as it is URL safe.
+
+The API does not inspect or manipulate the `state`, it is simply passed
+to the password reset link.
+"""
+input RequestPasswordResetForUserInput {
+  email: String!
+  state: String
+}
+
+type RequestPasswordResetForUserPayload {
+  email: String!
+}
+
+input ResetUserPasswordInput {
+  password: String!
+  token: String!
+}
+
+type RestrictedItemsByZipCodePayload {
+  restrictedItems: [Item!]!
+}
+
+type RetrievedAddress {
+  adminAreaCode: String
+  adminAreaName: String
+  block: String
+  buildingName: String
+  buildingNumber: String
+  city: String
+  company: String
+  country: String
+  countryName: String
+  dataLevel: String
+  department: String
+  district: String
+  domesticId: String
+  field1: String
+  field10: String
+  field11: String
+  field12: String
+  field13: String
+  field14: String
+  field15: String
+  field16: String
+  field17: String
+  field18: String
+  field19: String
+  field2: String
+  field20: String
+  field3: String
+  field4: String
+  field5: String
+  field6: String
+  field7: String
+  field8: String
+  field9: String
+  id: String
+  label: String
+  language: String
+  languageAlternatives: String
+  line1: String
+  line2: String
+  line3: String
+  line4: String
+  line5: String
+  neighbourhood: String
+  poBoxNumber: String
+  secondaryStreet: String
+  state: String
+  street: String
+  subBuilding: String
+  type: String
+  zip: String
+}
+
+type RetrievedItems {
+  items: [RetrievedAddress!]
+}
+
+type Reward {
+  categoryId: String
+  color: String
+  dateEnd: DateTime
+  dateStart: DateTime
+  description: String!
+  extraData: Json
+  freqCap: Int
+  freqPeriodId: Int
+  freqPeriodName: String
+  groupId: String
+  id: String!
+  image: String
+  isEnabled: Int
+  maxPerUser: Int
+  numPoints: Int!
+  quantity: Int
+  referenceId: String
+  size: String
+  title: String!
+}
+
+type RewardRedeemed {
+  balance: Int!
+}
+
+type RootMutationType {
+  acceptTermsAndConditions: User
+
+  """
+  Adds an item to a cart. Will create a new cart
+  if no `id` is included and cart is not already
+  associated with the requesting user. If a cart
+  already exists for the user or session we will
+  grab that cart and add the requested item.
+  
+  Cookie for cart is `decovo-shoppingcart`.
+  
+  Example:
+    ```
+    mutation AddCartItem($input: CartItemInput!) {
+      addCartItem(input: $input) {
+        id
+        items {
+          id
+          quantity
+          customizations
+        }
+      }
+    }
+    ```
+    Variables:
+  
+    ```
+    {
+      input: {
+        "item_id": "a2e22ba6-b113-268b-e14e-ad501cb19e18",
+        "quantity": 1
+      }
+    }
+    ```
+  """
+  addCartItem(input: CartItemInput!): Cart
+
+  """
+  Add a dynamic bundle of cart items to a cart.
+  
+  This will run a check to verify that all the items
+  submitted are qualified in the bundle, then updates
+  the cart with the proper meta data in the cart items to
+  qualify them for a discount.
+  
+  Please ensure the items are sorted correctly per component.
+  For example: If you send items for component A but belong to
+  component B then those items will not qualify for the bundle.
+  
+  Example:
+  ```
+    mutation AddDynamicBundle ($input: CartDynamicBundleInput!) {
+      addDynamicBundle(input: $input) {
+        id
+        dynamic_bundles
+        items {
+          item {
+            id
+          }
+          quantity
+          dynamic_bundle
+          customizations
+        }
+      }
+    }
+  ```
+  Variables:
+  ```
+  {
+    "input": {
+      "id": "456a9e8a-c9ba-4ccb-91bf-420549c32566",
+      "bundle_id": "1c231c97-ac47-43ce-87b6-6adb24067dd0",
+      "components": [
+        {
+          "component_id": "e76c5b69-8517-445b-9fad-650f52f816af",
+          "items": [
+            {
+              "item_id": "3c45a09d-e34f-4be5-8a67-18b93ad25b38",
+              "customizations": "[{"description": "Concave_White", "pattern_code":"286"}]"
+              "quantity": 5
+            },
+            {
+              "item_id": "85853232-dc23-4d90-ae11-df5337b9bf11",
+              "customizations": "[{"description": "Concave_White", "pattern_code":"286"}]"
+              "quantity": 5
+            }
+          ]
+        },
+        {
+          "component_id": "a283faf0-59a2-488e-ac65-7b61daa6cea4",
+          "items": [
+          {
+            "item_id": "704d74bc-2ae4-4d30-9046-02d2acd8225f",
+            "quantity": 8
+          },
+          {
+            "item_id": "9111915b-12a5-4818-b020-a9d2eddc6490",
+            "quantity": 2
+          }
+        ]
+      }
+    }
+  ```
+  """
+  addDynamicBundle(input: CartDynamicBundleInput!): Cart
+
+  """
+  Add an exact dynamic bundle of cart items to a cart.
+  
+  NOTE: This does not support customizations or subscriptions
+  
+  Example:
+  ```
+    mutation AddExactDynamicBundle ($input: CartExactDynamicBundleInput!) {
+      addExactDynamicBundle(input: $input) {
+        id
+        dynamic_bundles
+        items {
+          item {
+            id
+          }
+          dynamic_bundle
+        }
+      }
+    }
+  ```
+  Variables:
+  ```
+  {
+    "input": {
+      "id": "456a9e8a-c9ba-4ccb-91bf-420549c32566",
+      "bundle_id": "1c231c97-ac47-43ce-87b6-6adb24067dd0"
+    }
+  ```
+  
+  or via a bundle tag:
+  
+  ```
+  {
+    "input": {
+      "id": "456a9e8a-c9ba-4ccb-91bf-420549c32566",
+      "bundle_tag": "art-bialy-flavorpack"
+    }
+  ```
+  """
+  addExactDynamicBundle(input: CartExactDynamicBundleInput!): Cart
+
+  """
+  Add an item with unique customizations to a Cart.
+  If there are no customizations please use: AddCartItem
+  
+  mutation AddItemWithUniqueCustomizations ($input: AddItemWithUniqueCustomizationsInput!) {
+    addItemWithUniqueCustomizations(input: $input) {
+      id
+      user {
+        id
+      }
+      items {
+        id
+        item {
+          id
+        }
+        quantity
+        subscriptionIntervalInDays
+        customizations
+        analytics_details
+      }
+      total
+    }
+  }
+  ```
+  Variables:
+  ```
+  {
+    input: {
+      "cart_item_id": "a2e22ba6-b113-268b-e14e-ad501cb19e18",
+      "quantity": 1,
+      "customizations": "[{"description": "Concave_White", "pattern_code":"286"}]",
+      "subscriptionIntervalInDays": 15
+    }
+  }
+  ```
+  """
+  addItemWithUniqueCustomizations(input: AddItemWithUniqueCustomizationsInput!): Cart
+
+  """
+  Update the cart with loyalty reward applied
+  
+  If the given code is already present in the cart's loyalty_data field, its quantity and totals will be updated.
+  
+  Use a quantity of 0 (zero) to remove a reward from the cart.
+  
+  Example:
+    ```
+    mutation applyLoyaltyRewardToCart($input: LoyaltyRewardInput!) {
+      applyLoyaltyRewardToCart(input: $input) {
+        id
+        loyaltyData {
+          totalAmount
+          totalPoints
+        }
+        loyaltyRewards {
+          code
+          quantity
+          totalAmount
+          totalPoints
+        }
+      }
+    }
+    ```
+  
+    Variables:
+    ```
+    {
+      "input": {
+        "code": "1234567",
+        "quantity": 3
+      }
+    }
+    ```
+  """
+  applyLoyaltyRewardToCart(input: LoyaltyRewardInput!): Cart @deprecated(reason: "Use applyLoyaltyRewardToCartByPepdirectRewardId instead")
+
+  """
+  Update the cart with loyalty reward applied
+  
+  If the given pepdirect_reward_id is already present in the cart's loyalty_data
+  field, its quantity and totals will be updated.
+  
+  Use a quantity of 0 (zero) to remove a reward from the cart.
+  
+  Example:
+    ```
+    mutation applyLoyaltyRewardToCartByPepdirectRewardId($input: LoyaltyRewardInputByPepdirectRewardId!) {
+      applyLoyaltyRewardToCartByPepdirectRewardId(input: $input) {
+        id
+        loyaltyData {
+          totalAmount
+          totalPoints
+        }
+        loyaltyRewards {
+          code
+          quantity
+          totalAmount
+          totalPoints
+        }
+      }
+    }
+    ```
+  
+    Variables:
+    ```
+    {
+      "input": {
+        "pepdirect_reward_id": "fiveDollarOffReward",
+        "quantity": 3
+      }
+    }
+    ```
+  """
+  applyLoyaltyRewardToCartByPepdirectRewardId(input: LoyaltyRewardInputByPepdirectRewardId!): Cart
+
+  """
+  Update the cart with potential points from items in the cart
+  
+  Example:
+    ```
+    mutation applyPotentialPointsToCart {
+      applyPotentialPointsToCart {
+        id
+        loyaltyData {
+          totalEarnedPoints
+        }
+      }
+    }
+    ```
+  
+    Variables: none
+  """
+  applyPotentialPointsToCart: Cart
+  archiveRegistrationRecord(id: UUID4!): RegistrationRecord
+
+  """
+  associates an anonymous Cart (a Cart without a `user_id`) to the current
+  authenticated User.
+  """
+  associateCartToUser(cartId: UUID4!): Cart
+
+  """
+  Returns the order with the discounts applied. (Does not update order in DB)
+  """
+  calculateOrderDiscounts(input: CalculateOrderDiscountsInput!): CalculateOrderDiscountsPayload
+  calculateOrderTaxes(cartId: UUID4, contactInfo: ContactInfoInput, invoiceAddressId: UUID4, orderId: UUID4, paymentRequest: PaymentRequestInput, price: PriceInput): CalculateOrderPayload
+  cancelOrderSubscription(input: CancelOrderSubscriptionInput): OrderSubscription @deprecated(reason: "Please use update_order_subscription_status and set status to CANCELED and include a status_reason")
+  changeUserPassword(input: ChangeUserPasswordInput!): User
+  createAccountAndRegistrationRecord(registrationRecordInput: CreateRegistrationRecordInput!, userInput: SignupUserInput!): User
+
+  """
+  Creates an order.
+  
+  Mutation
+  ```
+  mutation CreateOrder($cartId: String!, $input: OrderInput) {
+    createOrder(cartId: $cartId, input: $input) {
+      app_id
+      cart{
+          id
+      }
+      id
+      status
+      location {
+        lat
+        long
+      }
+      user {
+        id
+        first_name
+        last_name
+      }
+      contact_info {
+          email
+          shipping_address{
+              line1
+          }
+      }
+      payment_request{
+          billing_address{
+              line1
+          }
+      }
+      price{
+          total
+      }
+      requested_delivery_date
+      submission_uid
+    }
+  }
+  ```
+  
+  Variables
+  ```
+  {
+    "cartId": "bcde7722-bf35-4a41-bc56-b200ec3155ae",
+    "input": {}
+  }
+  ```
+  """
+  createOrder(cartId: String!, input: OrderInput): CreatedOrder
+  createPaymentClientToken: PaymentClientTokenPayload!
+  createPaymentMethod(input: CreatePaymentMethodInput!): PaymentMethod!
+  createRegistrationRecord(input: CreateRegistrationRecordInput!): RegistrationRecord
+  createSetupIntent: SetupIntent!
+
+  """create a cart using a submitted user order"""
+  createTemporaryCartFromOrder(orderId: UUID4!): Cart
+  createUserAddress(input: UserAddressInput!): Address!
+  deleteCreditCard(input: DeleteCreditCardInput!): String!
+  deletePaymentMethod(input: DeletePaymentMethodInput!): String!
+  deleteUserAddress(id: UUID4!): Address!
+  emailNewsletterSignup(input: EmailNewsletterSignupInput!): String @deprecated(reason: "Please use `engagement_signup` going forward.")
+
+  """
+  Noting here that some tenants use the same parameters but the identifiers will have different
+  source id's. these are used to know the location of where the user initiated the signup ie. footer
+  Example:
+  ```
+  mutation engagementSignup($input: EngagementSignupInput!) {
+    engagementSignup(input: $input)
+  }
+  
+  #  Newsletter1
+  {
+    "input":  {"identifier1": {"email": "karen.schaper@pepsico.com", "firstName": "bob","lastName": "Smith"}}
+  }
+  
+  OR
+  
+  #  Out of Stock Email
+  {
+    "input":  {"identifier2": {"email": "karen.schaper@pepsico.com", "gtin": "00052000000481","emailOptIn": true}}
+  }
+  
+  OR
+  
+  #  Newsletter2
+  {
+    "input":  {"identifier3": {"email": "karen.schaper@pepsico.com", "firstName": "bob","lastName": "Smith"}}
+  }
+  
+  OR
+  
+  #  Newsletter3
+  {
+    "input":  {"identifier4": {"email": "karen.schaper@pepsico.com", "firstName":
+  "bob","lastName": "Smith", birthDate: "2020-01-02"}}
+  }
+  ```
+  """
+  engagementSignup(input: EngagementSignupInput!): String
+  login(input: LoginInput!): User @deprecated(reason: "Please use`loginUser` going forward.")
+  loginUser(input: LoginUserInput!): User
+  logoutUser: User
+
+  """
+  Allows the purchase of specific items configured for points purchase.
+  Example:
+  ```
+  mutation loyaltyPurchaseByPepdirectRewardId($input: loyaltyPurchaseInput!) {
+    loyaltyPurchaseByPepdirectRewardId(input: $input) {
+      appId
+      id
+      status
+      user {
+        id
+      }
+    }
+  }
+  ```
+  Variables:
+  ```
+  {
+      "input": {
+        "loyaltyItems" {
+          "itemId": "01ef0285-04e2-19d0-9cc9-bc274e0cb4a7"
+          "quantity": 2
+        }
+        "shippingAddressId": "17e20913-5d02-5e05-7122-5093252e99af",
+        "rewardId": "freeItem",
+        "rewardQuantity": 1
+      }
+    }
+  ```
+  """
+  loyaltyPurchaseByPepdirectRewardId(input: LoyaltyPurchaseInput!): SubmittedOrder
+
+  """
+  Update the user profile in the loyalty program
+  Example:
+    ```
+    mutation loyaltyUpdateProfile($input: userProfileInput!) {
+      loyaltyUpdateProfile(input: $input) {
+        firstName
+        lastName
+        totalPoints
+        redeemablePoints
+        customData
+      }
+    }
+    ```
+  
+    ```
+    Variables:
+  
+    ```
+    {
+      "input": {
+        "sweepstakes_optin": false,
+        "mailing_address": {
+              "state": "MA",
+              "city": "West Roxbury",
+              "street_address_1": "Valley View Drive",
+              "street_address_2": "4106",
+              "postal_code": "02132",
+              "phone_number": "5555555555"
+        }
+      }
+    }
+    ```
+  """
+  loyaltyUpdateProfile(input: UserProfileInput!): UserProfile
+
+  """merge two carts"""
+  mergeCarts(destCartId: UUID4!, srcCartId: UUID4!): Cart
+
+  """
+  Allows for multiple potential inputs using the base
+  key in the input type to determine what they are
+  inquiring about. Follows the same pattern as the
+  engagement_signup mutation.
+  """
+  partnerInquiry(input: PartnerInquiryInput!): String
+
+  """creates a cart from a temporary cart"""
+  persistTemporaryCart(srcCartId: UUID4!): Cart
+
+  """
+  Redeems a reward for a user.
+  Example:
+    ```
+    mutation RedeemReward($input: RedeemRewardInput!) {
+      redeemReward(input: $input) {
+        balance
+      }
+    }
+    ```
+    ```
+    Variables:
+    ```
+    {
+      "input": {
+        "reward_id": "410241571",
+        "quantity": 1
+      }
+    }
+    ```
+  """
+  redeemReward(input: RedeemRewardInput!): RewardRedeemed @deprecated(reason: "Use redeemRewardByPepdirectRewardId instead")
+
+  """
+  Redeems a reward for a user using the pepdirect_reward_id.
+  Example:
+    ```
+    mutation RedeemRewardByPepdirectRewardId($input: RedeemRewardByPepdirectRewardIdInput!) {
+      redeemRewardByPepdirectRewardId(input: $input) {
+        balance
+      }
+    }
+    ```
+    ```
+    Variables:
+    ```
+    {
+      "input": {
+        "pepdirect_reward_id": "fiveDollarOffReward",
+        "quantity": 1
+      }
+    }
+  """
+  redeemRewardByPepdirectRewardId(input: RedeemRewardByPepdirectRewardIdInput!): RewardRedeemed
+  registerAiDesign(colors: [AiDesignColorInput!], featuredWeight: Int, generatedByTenant: Boolean, imageUrls: Json!, itemId: UUID4!, prompAiEnhanced: String, promptUser: String, traits: [AiDesignTraitInput!]): AiDesign
+
+  """
+  Example:
+  ```
+    mutation RemoveDynamicBundle ($input: CartRemoveDynamicBundleInput!) {
+      removeDynamicBundle(input: $input) {
+        id
+        dynamic_bundles
+        items {
+          item {
+            id
+          }
+          quantity
+          dynamic_bundle
+        }
+      }
+    }
+  ```
+  Variables:
+  ```
+  {
+    "input": {
+      "id": "456a9e8a-c9ba-4ccb-91bf-420549c32566",
+      "cart_bundle_reference": 22222
+    }
+  }
+  ```
+  """
+  removeDynamicBundle(input: CartRemoveDynamicBundleInput!): Cart
+
+  """
+  Requests a Password Reset for a User with the email provided.
+  
+  Mutation
+  ```
+  mutation RequestPasswordResetForUser($input: RequestPasswordResetForUserInput!) {
+    requestPasswordResetForUser(input: $input) {
+      email
+    }
+  }
+  ```
+  
+  Variables
+  ```
+  {
+    "input": {
+      "email": "user@example.com"
+    }
+  }
+  ```
+  """
+  requestPasswordResetForUser(input: RequestPasswordResetForUserInput!): RequestPasswordResetForUserPayload
+
+  """
+  This Mutation has been deprecated, please use `requestPasswordResetForUser`
+  """
+  requestUserPasswordReset(email: String!): UserPasswordResetRequestPayload @deprecated(reason: "This Mutation has been deprecated, please use `requestPasswordResetForUser`\n")
+  resetUserPassword(input: ResetUserPasswordInput!): User
+
+  """
+  Example:
+    ```
+    mutation SendSspEmail($input: EmailSspInput!) {
+      sendSspEmail(input: $input) {
+        status
+      }
+    }
+  
+    ```
+    Variables:
+  
+    ```
+    {
+      "input":{
+        "firstName":"First name",
+        "lastName":"Last name",
+        "email":"email@pepsico.com",
+        "businessName":"Pepsico",
+        "businessAddress":"Business address",
+        "businessType":"Business Type",
+        "numberOfUsers":10,
+        "existingCustomer": true,
+        "manageAndOrder": "Manage and order",
+        "city": "Benito Juarez",
+        "state": "CDMX",
+        "zip": "03023",
+        "phone_number": "5512259112"
+      }
+    }
+    ```
+  """
+  sendSspEmail(input: EmailSspInput!): EmailSspResponse
+  signupUser(input: SignupUserInput!): User
+  skipOrderSubscription(
+    """The ID of the Order Subscription to skip"""
+    id: UUID4!
+  ): OrderSubscription
+
+  """
+  Submits an order, returning the created submittedOrder.
+  
+  Mutation
+  ```
+  mutation SubmitOrder($orderId: UUID4!, $input: SubmitOrderInput!) {
+    submitOrder(orderId: $orderId, input: $input) {
+      app_id
+      cart_id
+      giftee_email
+      giftee_message
+      giftor_name
+      is_gift
+      price {
+        discount
+      }
+      user {
+        email
+        first_name
+        last_name
+      }
+      status
+    }
+  }
+  ```
+  
+  Variables
+  ```
+  {
+    input: {
+      contactInfo: {
+        email: "tyrell1971@hoppe.name",
+        phone: "5555555555",
+        shippingAddress: {
+          city: "city",
+          company: "companyName",
+          countryCode: "country",
+          firstName: "firstName",
+          lastName: "lastName",
+          line1: "streetAddress",
+          line2: "addressDetails",
+          state: "AL",
+          zip: "zipCode"
+        }
+      },
+      paymentRequest: {
+        billingAddress: {
+          city: "city",
+          company: "companyName",
+          countryCode: "US",
+          firstName: "firstName",
+          lastName: "lastName",
+          line1: "streetAddress",
+          line2: "addressDetails",
+          state: "AL",
+          zip: "zipCode"
+        },
+        isBillingEqual_shipping: false,
+        paymentMethod: "CREDIT_CARD",
+        paymentToken: "token"
+      },
+      price: {discounts: []},
+      requestedDeliveryDate: ~D[2021-10-05]
+    },
+    orderId: "e1215198-69be-4eb3-8e95-8ad441ebfe0a"
+  }
+  ```
+  """
+  submitOrder(input: SubmitOrderInput, orderId: String!): SubmittedOrder
+
+  """
+  submit a users survey answers
+  
+  Example:
+    ```
+  mutation submitSurvey($input: SurveyResponseInput!) {
+    submitSurvey(input: $input) {
+      message
+      pointsAwarded
+      totalResponses
+    }
+  }
+    ```
+    Variables:
+    ```
+    {
+      "input": {
+        "pepdirectActivityId": "ncaaSweepsOptIn",
+        "surveyResponse": [
+          {
+              "questionId": 1,
+              "selectedAnswers": [2],
+              "textAnswer": "some answer",
+              "other": "some answer"
+          }
+        ]
+      }
+    }
+    ```
+  """
+  submitSurvey(input: SurveyResponseInput!): SurveySubmissionResponse
+
+  """
+  Add an item with unique customizations to a Cart.
+  If there are no customizations please use: AddCartItem
+  
+  mutation UniqueAddCartItem ($input: CartItemInput!) {
+    uniqueAddCartItem(input: $input) {
+      id
+      user {
+        id
+      }
+      items {
+        id
+        item {
+          id
+        }
+        quantity
+        subscriptionIntervalInDays
+        customizations
+        analytics_details
+      }
+      total
+    }
+  }
+  ```
+  Variables:
+  ```
+  {
+    input: {
+      "item_id": "a2e22ba6-b113-268b-e14e-ad501cb19e18",
+      "quantity": 1,
+      "subscriptionIntervalInDays": 15
+      "customizations": "[{"description": "Concave_White", "pattern_code":"286"}]"
+    }
+  }
+  ```
+  """
+  uniqueAddCartItem(input: CartItemInput!): Cart @deprecated(reason: "This is being deprecated instead please use: AddItemWithUniqueCustomizations")
+
+  """
+  Add an item with unique customizations to a Cart.
+  If there are no customizations please use: AddCartItem
+  
+  mutation UniqueUpdateCartItem ($input: UniqueCartItemInput!) {
+    uniqueUpdateCartItem(input: $input) {
+      id
+      user {
+        id
+      }
+      items {
+        id
+        item {
+          id
+        }
+        quantity
+        customizations
+        analytics_details
+      }
+      total
+    }
+  }
+  ```
+  Variables:
+  ```
+  {
+    input: {
+      "id": "a2e22ba6-b113-268b-e14e-ad501cb19e18",
+      "cart_item_id": "8e918d59-6a8c-4d25-9b16-5bb64722e5f0",
+      "quantity": 1,
+      "subscriptionIntervalInDays": 15
+      "customizations": "[{"description": "Concave_White", "pattern_code":"286"}]"
+    }
+  }
+  ```
+  """
+  uniqueUpdateCartItem(input: UniqueCartItemInput!): Cart @deprecated(reason: "This is being deprecated instead please use: UpdateItemWithUniqueCustomizations")
+  updateCartGift(input: IsGiftInput!): Cart
+  updateCartItem(input: CartItemInput!): Cart
+  updateCreditCardDefault(input: UpdateCreditCardDefaultInput!): CreditCard!
+
+  """
+  Add an item with unique customizations to a Cart.
+  If there are no customizations please use: AddCartItem
+  
+  mutation UpdateItemWithUniqueCustomizations ($input: UpdateItemWithUniqueCustomizationsInput!) {
+    updateItemWithUniqueCustomizations(input: $input) {
+      id
+      user {
+        id
+      }
+      items {
+        id
+        item {
+          id
+        }
+        quantity
+        subscriptionIntervalInDays
+        customizations
+        analytics_details
+      }
+      total
+    }
+  }
+  ```
+  Variables:
+  ```
+  {
+    input: {
+      "item_id": "a2e22ba6-b113-268b-e14e-ad501cb19e18",
+      "quantity": 1,
+      "subscriptionIntervalInDays": 15
+      "customizations": "[{"description": "Concave_White", "pattern_code":"286"}]"
+    }
+  }
+  ```
+  """
+  updateItemWithUniqueCustomizations(input: UpdateItemWithUniqueCustomizationsInput!): Cart
+
+  """
+  Updates an order.
+  
+  Mutation
+  ```
+  mutation UpdateOrder($orderId: UUID4!, $input: UpdateOrderInput!) {
+    updateOrder(orderId: $orderId, input: $input) {
+      id
+      appId
+      requestedDeliveryDate
+      contactInfo {
+        email
+        phone
+        shippingAddress {
+          city
+          zip
+        }
+      }
+      paymentRequest {
+        paymentMethod
+        isBillingEqualShipping
+        billingAddress {
+          city
+          zip
+        }
+      }
+    }
+  }
+  ```
+  
+  Variables
+  ```
+  {
+    "order_id": "3965354a-260c-4fdd-a0d5-75f6efee4207",
+    "input": {}
+  }
+  ```
+  """
+  updateOrder(input: UpdateOrderInput!, orderId: UUID4!): CreatedOrder @deprecated(reason: "  Order updates should be submitted through the SubmitOrder mutation\n")
+  updateOrderSubscription(input: UpdateOrderSubscriptionInput!): OrderSubscription
+  updateOrderSubscriptionAddress(input: UpdateOrderSubscriptionAddressInput!): OrderSubscription
+  updateOrderSubscriptionPayment(input: UpdateOrderSubscriptionPaymentInput!): OrderSubscription
+  updateOrderSubscriptionQuantity(input: UpdateOrderSubscriptionQuantityInput!): OrderSubscription
+  updateOrderSubscriptionStatus(input: UpdateOrderSubscriptionStatusInput!): OrderSubscription
+  updatePaymentMethodDefault(input: UpdatePaymentMethodDefaultInput!): PaymentMethod!
+  updateUserAddress(id: UUID4!, input: UserAddressInput!): Address!
+  updateUserAddressIsDefault(id: UUID4!, input: UserAddressIsDefaultInput!): Address!
+
+  """
+  Updates user's first name and last name.
+  
+  Mutation
+  ```
+  mutation UpdateUserFirstLastName($input: UpdateUserFirstLastNameInput!) {
+    updateUserFirstLastName(input: $input) {
+      id
+      first_name
+      last_name
+    }
+  }
+  ```
+  
+  Variables
+  ```
+  {
+    "input": {
+      "id": "UUID4",
+      "first_name": "New"
+      "last_name": "Updated"
+    }
+  }
+  ```
+  """
+  updateUserFirstLastName(input: UpdateUserFirstLastNameInput!): User
+
+  """
+  Credits an activity to a user
+  Example:
+    ```
+    mutation UserActivityCredit($input: ActivityCreditInput!) {
+      userActivityCredit(input: $input) {
+        awarded
+      }
+    }
+    ```
+  
+    ```
+    Variables:
+  
+    ```
+    {
+      "input": {
+        "activity_id": "410241571",
+        "activity_date": "2024-03-02T01:56:08Z",
+        "extra_data": "{"some_key": "some_value"}"
+      }
+    }
+    ```
+  """
+  userActivityCredit(input: ActivityCreditInput!): ActivityAwarded @deprecated(reason: "Use userActivityCreditByPepdirectActivityId instead")
+
+  """
+  Credits an activity to a user by the pepdirect activity id
+  Example:
+    ```
+    mutation UserActivityCreditByPepdirectActivityId($input: ActivityCreditByPepdirectActivityIdInput!) {
+      userActivityCreditByPepdirectActivityId(input: $input) {
+        awarded
+        numPoints
+      }
+    }
+    ```
+  
+    ```
+    Variables:
+  
+    ```
+    {
+      "input": {
+        "pepdirect_activity_id": "CompletedWorkout",
+        "activity_date": "2024-03-02T01:56:08Z",
+        "num_points": 500,
+        "extra_data": "{"some_key": "some_value"}"
+      }
+    }
+    ```
+  """
+  userActivityCreditByPepdirectActivityId(input: ActivityCreditByPepdirectActivityIdInput!): ActivityAwarded
+
+  """
+  mutation UserAddressVerification {
+      userAddressVerification(
+        input: {
+          first_name: "",
+          last_name: "",
+          company: "",
+          country_code: "",
+          city: "",
+          state: "",
+          zip: "",
+          line1: "",
+          line2: ""
+        }
+      )
+      {
+        first_name,
+        last_name,
+        company,
+        country_code,
+        city,
+        state,
+        zip,
+        line1,
+        line2,
+        success,
+        errors{
+          code,
+          field,
+          message,
+          suggestion
+        }
+      }
+    }
+  """
+  userAddressVerification(input: VerifyAddressInput!): VerifyAddressPayload
+
+  """
+  Submits code to be redeemed for a user
+  Example:
+    ```
+    mutation UserCodeSubmit($input: UserCodeSubmitInput!) {
+      userCodeSubmit(input: $input) {
+        num_points
+      }
+    }
+    ```
+  
+    ```
+    Variables:
+  
+    ```
+    {
+      "input": {
+        "code_value": "abc123",
+        "campaign_id": "6546743"
+      }
+    }
+    ```
+  """
+  userCodeSubmit(input: UserCodeSubmitInput!): CodeSubmitted
+
+  """
+  mutation AddressVerification {
+      verifyAddressForOrder(
+        orderId: "",
+        input: {
+          first_name: "",
+          last_name: "",
+          company: "",
+          country_code: "",
+          city: "",
+          state: "",
+          zip: "",
+          special_instructions: "",
+          line1: "",
+          line2: ""
+        }
+      )
+      {
+        first_name,
+        last_name,
+        company,
+        country_code,
+        city,
+        state,
+        zip,
+        line1,
+        line2,
+        special_instructions,
+        success,
+        errors{
+          code,
+          field,
+          message,
+          suggestion
+        }
+      }
+    }
+  """
+  verifyAddressForOrder(input: VerifyAddressInput!, orderId: String!): VerifyAddressPayload
+}
+
+type RootQueryType {
+  """
+  Gets the currently active account
+  Example:
+    ```
+    query {
+      activeAccount {
+        type
+        credits {
+          status
+          type
+          availableAmount
+          spentAmount
+          activeFrom
+          activeUntil
+        }
+      }
+    }
+    ```
+  """
+  activeAccount: Account
+  aiDesigns(filters: AiDesignFilterInput = {colors: [], ids: [], sources: [TENANT], traits: []}, pagination: PaginationInput = {limit: 10, page: 1}, sorting: AiDesignSortingInput): AiDesignResult
+
+  """Retrieves a cart given an id"""
+  cart(id: UUID4!): Cart
+
+  """Retrieves a cart given a hashed email for Salesforce"""
+  cartRecovery(id: String!): Cart
+
+  """
+  Gets the currently logged in user
+  Example:
+    ```
+    query {
+      currentUser {
+        email
+        firstName
+        lastName
+        creditCards {
+          cardholderName
+          billingAddress{
+            firstName
+            lastName
+          }
+        }
+        addresses{
+          line1
+          line2
+        }
+      }
+    }
+    ```
+  """
+  currentUser: User
+
+  """
+  Retrieve a Dynamic Bundle, its Components, and all Items associated.
+  Example:
+  ```
+  query DynamicBundle($id: UUID4!) {
+    dynamicBundle(id: $id) {
+      id
+      name
+      tag
+      min_retail_price
+      components {
+        id
+        name
+        qty_type
+        required_qty
+        discount {
+          amount
+          type
+        }
+        items {
+          id
+          gtin
+          is_dairy_free
+          is_gluten_free
+        }
+      }
+    }
+  }
+  
+  {"id": "bundle_id"}
+  ```
+  """
+  dynamicBundle(id: UUID4!): DynamicBundle
+
+  """
+  Retrieve a Dynamic Bundle, its Components, and all Items associated.
+  Example:
+  ```
+  query DynamicBundleByTag($tag: String!) {
+    dynamicBundle(tag: $tag) {
+      id
+      name
+      tag
+      min_retail_price
+      components {
+        id
+        name
+        required_qty
+        items {
+          id
+          gtin
+          is_dairy_free
+          is_gluten_free
+        }
+      }
+    }
+  }
+  
+  {"id": "bundle_id"}
+  ```
+  """
+  dynamicBundleByTag(tag: String!): DynamicBundle
+
+  """
+  Retrieve all Dynamic Bundles and their Components.
+  Example:
+  ```
+  query DynamicBundles {
+    dynamicBundles {
+      id
+      name
+      tag
+      components {
+        id
+        name
+        required_qty
+      }
+    }
+  }
+  ```
+  """
+  dynamicBundles: [DynamicBundle]
+
+  """
+  Retrieve all Dynamic Bundles that contain a given gtin.
+  Example:
+  ```
+  query DynamicBundlesWithGtin($gtin: String!) {
+    dynamicBundlesWithGtin(gtin: $gtin) {
+      id
+      name
+      tag
+      components {
+        id
+        name
+        required_qty
+      }
+    }
+  }
+  
+  query DynamicBundlesWithGtin($gtin: String!, primary: boolean) {
+    dynamicBundlesWithGtin(gtin: $gtin, primary: true) {
+      id
+      name
+      tag
+      components {
+        id
+        name
+        required_qty
+      }
+    }
+  }
+  ```
+  """
+  dynamicBundlesWithGtin(gtin: String!, primary: Boolean): [DynamicBundle]
+
+  """
+  Lookup all Feature Flags. If a `User` is logged in, the Feature Flags will reflect `User` specific Feature Flags.
+  """
+  featureFlags: [FeatureFlag!]!
+
+  """
+  Get address suggestions for easy user input
+  Example
+  ```
+  query FindAddress($input: FindAddressInput!) {
+    findAddress(input: $input) {
+      items {
+        id
+        value
+        description
+        type
+        highlight
+      }
+    }
+  }
+  
+  {"input": {"text": "3110 Pepsi road", "limit": "10"}}
+  ```
+  """
+  findAddress(input: FindAddressInput!): FoundItems
+
+  """
+  Uses internal machine learning endpoint to suggest product
+    recommendations based on the items in the cart
+  
+    Example:
+    ```
+    query findRecommendations($cartId: UUID4!, $numberRequested: Int!) {
+      findRecommendations(cartId: $cartId, numberRequested: $numberRequested) {
+        id
+        gtin
+        title
+        imgUrl
+      }
+    }
+    ```
+    Variables:
+  
+    ```
+    {"cartId": "63a4ef4e-1cac-409d-b40c-38db5f064cd3",
+    "numberRequested": 3}
+    ```
+  """
+  findRecommendations(cartId: UUID4!, numberRequested: Int!): [Item]
+
+  """
+  Gets details about an activity
+  Example:
+    ```
+    query GetActivity($activityId: String!) {
+      getActivity(activity_id: $activityId) {
+        activityId
+        extraData
+        internalName
+        displayName
+        numPoints
+        imgUrl
+        freqCap
+        freqPeriodId
+        freqPeriodName
+      }
+    }
+    ```
+  """
+  getActivity(activityId: String): UserActivity
+
+  """
+  Gets activities available for the current tenant from the loyalty program. Most useful when the user is not logged in.
+  Example:
+  ```
+    query {
+      getAvailableActivitiesForTenant {
+        activityId
+        internalName
+        displayName
+        description
+        numPoints
+        imgUrl
+        dateStart
+        dateEnd
+        extraData
+        freqCap
+        freqPeriodId
+        freqPeriodName
+      }
+    }
+  ```
+  """
+  getAvailableActivitiesForTenant: [Activity]
+
+  """
+  Gets activities available for the given user from the loyalty program
+  Example:
+  ```
+    query {
+      getAvailableActivitiesForUser {
+        activityId
+        internalName
+        displayName
+        description
+        numPoints
+        imgUrl
+        dateStart
+        dateEnd
+        extraData
+        freqCap
+        freqPeriodId
+        freqPeriodName
+      }
+    }
+  ```
+  """
+  getAvailableActivitiesForUser: [Activity]
+
+  """
+  Return a list of items, paginated
+  Example:
+    ```
+    query getItems {
+      getItems(
+        pagination: {
+          page: 1
+          limit: 10
+        }) {
+        items {
+          id
+        }
+      }
+    }
+    ```
+  """
+  getItems(brands: [String!], id: String, ids: [String!], isOutOfStock: Boolean, onMarketplace: Boolean, pagination: PaginationInput = {limit: 10, page: 1}, pending: Boolean, slug: String, storyId: String, upcs: [String!]): ItemsPayload @deprecated(reason: "Please use `items` going forward.")
+
+  """
+  Gets user profile from the loyalty program
+  Example:
+    ```
+    query {
+      getLoyaltyProfile {
+        firstName
+        lastName
+        totalPoints
+        redeemablePoints
+      }
+    }
+    ```
+  """
+  getLoyaltyProfile: UserProfile
+
+  """
+  Gets list of rewards for the loyalty program
+  Example:
+    ```
+    query {
+      getLoyaltyRewards {
+        categoryId
+        color
+        dateEnd
+        dateStart
+        description
+        extraData
+        freqCap
+        freqPeriodId
+        freqPeriodName
+        groupId
+        id
+        image
+        isEnabled
+        maxPerUser
+        numPoints
+        quantity
+        referenceId
+        size
+        title
+      }
+    }
+    ```
+  """
+  getLoyaltyRewards: [Reward]
+
+  """
+  Gets potential points for a given items list.
+  Prices are in cents, have quantity included and discounts applied.
+  For example, for calculating points of 2 of an item that costs $25 (after applying discounts),
+  the price is 5000 and the quantity is 2.
+  Example:
+    ```
+    query GetPotentialPoints($input: PotentialPointsInput!) {
+      getPotentialPoints(input: $input) {
+        totalPointsAwarded
+      }
+    }
+    ```
+  
+    ```
+    Variables:
+  
+    ```
+    {
+      "input": {
+        "items": [
+          {
+            "upc": "123456789",
+            "quantity": 1,
+            "price": 100
+          }
+        ]
+      }
+    }
+    ```
+  """
+  getPotentialPoints(input: PotentialPointsInput!): PotentialPoints
+
+  """
+  Gets details about an activity available for the given user from the loyalty program
+  Example:
+    ```
+    query GetUserActivity($activityId: String!) {
+      getUserActivity(activity_id: $activityId) {
+        activityId
+        extraData
+        internalName
+        displayName
+        numPoints
+        imgUrl
+        freqCap
+        freqPeriodId
+        freqPeriodName
+        userNumCompletions
+      }
+    }
+    ```
+  """
+  getUserActivity(activityId: String): UserActivity
+
+  """
+  Gets user's activity history from the loyalty program
+  Example:
+    ```
+    query {
+      getUserActivityHistory {
+        activities {
+          activity_id
+          extra_data
+          internal_name
+          display_name
+          num_points
+          img_url
+          date
+          freq_cap
+          freq_period_id
+          freq_period_name
+        }
+        redemptions {
+          activity_id
+          extra_data
+          internal_name
+          display_name
+          num_points
+          img_url
+          date
+          freq_cap
+          freq_period_id
+          freq_period_name
+        }
+      }
+    }
+    ```
+  """
+  getUserActivityHistory(pagination: PaginationInput = {limit: 10, page: 1}): UserActivityHistory
+
+  """
+  Gets list of rewards for a specific user in the loyalty program.
+  
+  For pagination input, the maximum limit of items per page is 10.
+  
+  Example:
+    ```
+    query {
+      getUserLoyaltyRewards {
+        categoryId
+        color
+        dateEnd
+        dateStart
+        description
+        extraData
+        freqCap
+        freqPeriodId
+        freqPeriodName
+        groupId
+        id
+        image
+        isEnabled
+        maxPerUser
+        numPoints
+        quantity
+        referenceId
+        size
+        title
+      }
+    }
+    ```
+  """
+  getUserLoyaltyRewards(pagination: PaginationInput = {limit: 10, page: 1}): [Reward]
+
+  """
+  Gets user's receipt history from the loyalty program
+  Example:
+    ```
+    query {
+      getUserReceiptHistory (pagination: {page: 1, limit: 2}) {
+        pagination
+        {
+          total
+          pages
+          next_page_link
+          prev_page_link
+          has_next_page
+          has_prev_page
+        }
+        receipts
+        {
+          dateSubmitted
+          fileId
+          fileName
+          fileUrl
+          id
+          scanResult
+          scanResultText
+        }
+      }
+    }
+    ```
+  """
+  getUserReceiptHistory(pagination: PaginationInput = {limit: 10, page: 1}): ReceiptInfoHistory
+
+  """
+  Gets a list of historical rewards the the loyalty member has redeemed.
+  
+  Example:
+    ```
+    query {
+      getUserRedemptionHistory (pagination: {page: 1, limit: 2}) {
+        pagination
+        {
+          total
+          pages
+          next_page_link
+          prev_page_link
+          has_next_page
+          has_prev_page
+        },
+        redemptions
+        {
+          categoryId
+          dateCreated
+          description
+          endingBalance
+          extraData
+          groupId
+          image
+          rewardId
+          rewardTitle
+          totalPointsRedeemed
+        }
+      }
+    }
+    ```
+  """
+  getUserRedemptionHistory(pagination: PaginationInput = {limit: 10, page: 1}): RedemptionInfoHistory
+
+  """
+  Returns an `Item` for the given `GTIN`.
+  
+  Example
+  ```
+  query ItemByGtin($gtin: String!) {
+    itemByGtin(gtin: $gtin) {
+      id
+      description
+      title
+    }
+  }
+  
+  {"gtin": "000111222333444555}
+  ```
+  """
+  itemByGtin(gtin: String!, isArchived: Boolean = false): Item
+
+  """
+  Return the item by its id
+  Example:
+    ```
+    query itemById($id: String!) {
+      itemById(id: $id) {
+        id
+        description
+      }
+    }
+   {"id": "id"}
+    ```
+  """
+  itemById(id: String!): Item
+
+  """
+  Return the item by its slug
+  Example:
+    ```
+    query itemBySlug($slug: String!) {
+      itemBySlug(slug: $slug) {
+        id
+        description
+      }
+    }
+   {"slug": "slug"}
+    ```
+  """
+  itemBySlug(brands: [String!], id: String, ids: [String!], isOutOfStock: Boolean, onMarketplace: Boolean, pagination: PaginationInput = {limit: 10, page: 1}, pending: Boolean, slug: String!, storyId: String, upcs: [String!]): Item
+
+  """
+  Return a list of items, paginated
+  Example:
+    ```
+    query getItems {
+      getItems(
+        pagination: {
+          page: 1
+          limit: 10
+        }) {
+        items {
+          id
+        }
+      }
+    }
+    ```
+  """
+  items(brands: [String!], gtins: [String!], id: String, ids: [String!], isOutOfStock: Boolean, onMarketplace: Boolean, pagination: PaginationInput = {limit: 10, page: 1}, pending: Boolean, slug: String, storyId: String): ItemsPayload
+
+  """
+  Return a list of items, paginated
+  Example:
+    ```
+    query getItems {
+      getItems(
+        pagination: {
+          page: 1
+          limit: 10
+        }) {
+        items {
+          id
+        }
+      }
+    }
+    ```
+  """
+  itemsSearch(pagination: PaginationInput = {limit: 10, page: 1}, term: String): ItemsPayload
+  localization: Localization
+  modules: [Module!]!
+
+  """
+  Return a single order filtered by id
+  Example:
+    ```
+    query OrderQueries {
+      order(order_id: order_uuid) {
+        id
+      }
+    }
+    ```
+  """
+  order(orderId: UUID4!): Order
+
+  """
+  query getOrderSubscriptionForUser($id: UUID4!) {
+    orderSubscription(id: $id) {
+      id
+      title
+      intervalInDays
+      orderSubscriptionItems {
+        priceItem {
+          basePrice
+          id
+        }
+      }
+    }
+  }
+  """
+  orderSubscription(id: UUID4!): OrderSubscription
+
+  """
+  query getAllOrderSubscriptionsForUser {
+    orderSubscriptions {
+      orderSubscriptions {
+        id
+        title
+        intervalInDays
+        orderSubscriptionItems {
+          priceItem {
+            basePrice
+            id
+          }
+        }
+      }
+    }
+  }
+  """
+  orderSubscriptions: OrderSubscriptionsPayload
+
+  """
+  Returns a list of items forbidden from being sold in the given zip code.
+  If a list of upcs is given, it will check only those items, otherwise will check all items in the store.
+  Example:
+    ```
+    query RestrictedItemsByZipCode {
+      restrictedItemsByZipCode(
+        zip: "94545",
+        upcs: ["2141212", "2142145432"]) {
+        restrictedItems {
+          id
+        }
+      }
+    }
+    ```
+  """
+  restrictedItemsByZipCode(upcs: [String!], zip: String!): RestrictedItemsByZipCodePayload
+
+  """
+  Retrieve an address with an id.
+  
+  Example
+  ```
+  query RetrieveAddress($id: String!) {
+    retrieveAddress(id: $id) {
+      items {
+        id
+        line1
+        line2
+        city
+        state
+        zip
+        country
+      }
+    }
+  }
+  
+  {"id": "id_12345678"}
+  ```
+  """
+  retrieveAddress(id: String!): RetrievedItems
+
+  """
+  Searchs and displays an application's list of
+  discounts which meet certain requirements.
+  
+  typeDependentValue can be one of the following values:
+  - vendor_id
+  - item_id
+  - app_id
+  
+  type can be one of the following values:
+  - BRAND
+  - PRODUCT
+  - VENDOR
+  - ITEM_SET
+  
+  itemSet is a list of item ids to match against if the campaign is an itemSet campaign.
+  
+  behaviour can be one of the following
+  - BASIC
+  - TIERED
+  - BOGO
+  
+  Query
+  
+    ```
+    query SearchDiscounts($input: SearchDiscountsInput!) {
+      searchDiscounts(input: $input) {
+        discounts{
+          id
+          activeFrom
+          activeUntil
+          amount
+          appId
+          isPercent
+          isPromoCodeRequired
+          limit
+          promoCode
+          type
+          typeDependentValue
+          usage
+        }
+      }
+    }
+    ```
+  
+    Input Examples
+  
+    Finding a basic item specific discount with a promo code
+    ```
+    {
+      input: {
+        "type": "ITEM",
+        "typeDependentValue": "a2e22ba6-b113-268b-e14e-ad501cb19e18",
+        "promoCode": "PROMOCODE",
+        "behaviour": "BASIC"
+      }
+    }
+    ```
+    Finding a tiered discount that includes a specific item in its itemSet
+    ```
+    {
+      input: {
+        "type": "ITEM_SET",
+        "behaviour": "TIERED",
+        "itemSet": [""a2e22ba6-b113-268b-e14e-ad501cb19e18""]
+      }
+    }
+    ```
+  """
+  searchDiscounts(input: SearchDiscountsInput!): Discounts
+
+  """
+  Returns a `Story` with the given `id`.
+  
+  Example:
+  ```
+  query StoryById($id: UUID4!) {
+    story: storyById(id: $id) {
+      app_id
+      body
+      cta1
+      cta2
+      cta3
+      id
+      insertedAt
+      moduleType
+      slug
+      slugHash
+      tags
+      title1
+      title2
+      title3
+      updatedAt
+    }
+  }
+  ```
+  """
+  story(id: UUID4!): Story
+
+  """
+  Returns a `Story` with the given `id`.
+  
+  Example:
+  ```
+  query StoryById($id: UUID4!) {
+    story: storyById(id: $id) {
+      app_id
+      body
+      cta1
+      cta2
+      cta3
+      id
+      insertedAt
+      moduleType
+      slug
+      slugHash
+      tags
+      title1
+      title2
+      title3
+      updatedAt
+    }
+  }
+  ```
+  """
+  storyById(id: UUID4!): Story @deprecated(reason: "Use \"story\" query with ID parameter in favor of \"storyById\"")
+
+  """
+  Returns a `Story` with the given `slug`.
+  
+  Example:
+  ```
+  query StoryBySlug($slug: String!) {
+    story: storyBySlug(slug: $slug) {
+      app_id
+      body
+      cta1
+      cta2
+      cta3
+      id
+      insertedAt
+      moduleType
+      slug
+      slugHash
+      tags
+      title1
+      title2
+      title3
+      updatedAt
+    }
+  }
+  ```
+  """
+  storyBySlug(slug: String!): Story @deprecated(reason: "Use \"story\" query with ID parameter in favor of \"storyBySlug\"")
+
+  """
+  Return a single submitted order filtered by id
+  Example:
+    ```
+    query SubmittedOrderQueries {
+      submitted_order(order_id: order_uuid) {
+        id
+      }
+    }
+    ```
+  """
+  submittedOrder(orderId: UUID4!): SubmittedOrder
+
+  """
+  Return a list of orders, paginated, for the current user
+  Example:
+    ```
+    query SubmittedOrderQueries {
+      submitted_orders(
+        pagination: {
+          page: 1
+          limit: 10
+        }) {
+        orders_count
+        submitted_orders {
+        id
+        }
+      }
+    }
+    ```
+  """
+  submittedOrders(pagination: PaginationInput = {limit: 10, page: 1}): SubmittedOrderPayload!
+
+  """
+  Gets details about a Survey for an authenticated user from the loyalty program by the survey pepdirect_activity_id
+  Example:
+    ```
+    query SurveyDetails($pepdirectActivityId: String!) {
+      surveyDetails(pepdirect_activity_id: $pepdirectActivityId) {
+        activityId
+        activityTags
+        dateEnd
+        dateStart
+        description
+        displayPoints
+        extraData
+        imageUrl
+        isEnabled
+        numPoints
+        otherLabel
+        questions {
+          allowOther
+          answerOptions
+          displayOrder
+          id
+          questionType
+          required
+          value
+        }
+        singleSubmit
+        title
+      }
+    }
+    ```
+  """
+  surveyDetails(pepdirectActivityId: String): Survey
+
+  """
+  Gets the responses from a survey for an authenticated user from the loyalty program by the survey pepdirect_activity_id
+  Example:
+    ```
+    query SurveyResults($pepdirectActivityId: String!) {
+      surveyResults(pepdirect_activity_id: $pepdirectActivityId) {
+        surveyResponse {
+          other
+          questionId
+          selectedAnswers
+          textAnswer
+        }
+      }
+    }
+    ```
+  """
+  surveyResults(pepdirectActivityId: String): SurveyResponse
+
+  """
+  Return the `Tenant` associated with the domain of the site making the request
+  Example:
+    ```
+    query {
+      tenant {
+        appId
+        domain
+        fallbackUrl
+      }
+    }
+    ```
+  """
+  tenant: Tenant
+
+  """
+  Validates if the given password meets the minimum complexity requirements.
+  
+  Example:
+    ```
+    query validatePassword($password: String!) {
+      validatePassword(password: $password)
+    }
+    ```
+    Variables:
+  
+    ```
+    {"password": "$123ASDsarasa"}
+    ```
+  """
+  validatePassword(password: String!): [PasswordRequirement!]!
+
+  """
+  Returns a list of items forbidden from being sold in the given zip code.
+  If a list of upcs is given, it will check only those items, otherwise will check all items in the store.
+  Example:
+    ```
+    query validateZipcode {
+      validateZipcode(
+        zip: "94545",
+        upcs: ["2141212", "2142145432"]) {
+        restrictedItems {
+          id
+        }
+      }
+    }
+    ```
+  """
+  validateZipcode(upcs: [String!], zip: String!): ValidateZipcodePayload @deprecated(reason: "Please use `restrictedItemsByZipCode` going forward.")
+
+  """
+  Deprecated in favor or `tenant`.
+  
+  Return the VendorConfig associated with the domain of the site making the request
+  Example:
+    ```
+    query {
+      vendorConfig {
+        appId
+        domain
+        fallbackUrl
+      }
+    }
+    ```
+  """
+  vendorConfig: Tenant @deprecated(reason: "This Query has been deprecated in favor of `tenant`.\n\n")
+}
+
+type SapLink {
+  activeCustomerIds: [String!]
+  customerIds: [String!]
+  primaryCustomerId: String
+  propertyId: String
+}
+
+input SearchDiscountsInput {
+  behaviour: BehaviourEnum
+  itemSet: [String!]
+  promoCode: String
+  type: DiscountType
+  typeDependentValue: UUID4
+}
+
+type SetupIntent {
+  clientSecret: String!
+}
+
+type ShippingConfig {
+  fixedFeeShipping: Int
+  freeShippingThreshold: Int
+  maxDeliveryWindowInDays: Int
+}
+
+type ShoppingBagConfig {
+  availableSubscriptionIntervalsInDays: [Int!]!
+  maxAmountForSelect: Int!
+  minimumPurchaseAmount: Int!
+  minimumPurchaseQty: Int!
+  orderSubscriptionsEnabled: Boolean!
+  subscriptionIntervalsInDays: [Int!]!
+}
+
+enum SignupChannelType {
+  """Android device"""
+  ANDROID
+
+  """iOS device"""
+  IOS
+  NOT_SET
+
+  """Web platform"""
+  WEB
+}
+
+input SignupUserInput {
+  activationCode: String
+  activationCodeRequired: Boolean = false
+  botProtectionToken: String
+  channel: SignupChannelType = WEB
+  dateOfBirth: Date
+  email: String!
+  emailOptIn: Boolean = false
+
+  """this field will contain fields specific for engagement implementations"""
+  engagementCustomData: Json
+  firstName: String
+  lastName: String
+  loyaltyReferralCode: String = ""
+  password: String!
+}
+
+input SmsInput {
+  emailHash: String!
+  phoneNumber: String!
+  sourceId: String!
+}
+
+input SmsInputLoggedUser {
+  phoneNumber: String!
+  sourceId: String!
+}
+
+enum SortableFields {
+  FEATURED_WEIGHT
+  GTIN
+  INSERTED_AT
+}
+
+enum SortableMethods {
+  ASC
+  DESC
+}
+
+"""identifies the front end source of incoming data"""
+enum SourceType {
+  DEFAULT
+  FOOTER
+}
+
+enum SourceTypes {
+  """All designs regardless of source"""
+  ALL
+
+  """Designs created by users other than yourself, but not by the tenant"""
+  OTHERS
+
+  """Designs created by the requesting user"""
+  SELF
+
+  """Designs created by the tenant and marked and 'generatedByTenant'"""
+  TENANT
+}
+
+type StatesConfig {
+  countryId: String!
+  statesAllowed: [AllowedState!]!
+}
+
+enum StatusLabels {
+  """Canceled"""
+  CANCELED
+
+  """Complete"""
+  COMPLETE
+
+  """NoChange"""
+  NO_CHANGE
+
+  """Unknown"""
+  UNKNOWN
+}
+
+enum StatusType {
+  ACTIVE
+  ARCHIVED
+}
+
+input StockNotificationInput {
+  email: String!
+  gtin: String!
+  sourceId: String!
+}
+
+type Story {
+  appId: ID
+  body: String
+  cta1: String
+  cta2: String
+  cta3: String
+  id: UUID4
+  insertedAt: DateTime
+  items: [Item]
+  module: Module
+  moduleType: String
+  slug: String
+  slugHash: String
+  tags: [String]
+  title1: String
+  title2: String
+  title3: String
+  updatedAt: DateTime
+}
+
+input SubmitOrderInput {
+  contactInfo: ContactInfoInput!
+
+  """Field size should not exceed 25 characters"""
+  customerPo: String
+  gifteeEmail: String
+  gifteeMessage: String
+  giftorName: String
+  invoiceAddressId: UUID4
+  isGift: Boolean
+  paymentRequest: PaymentRequestInput!
+  price: PriceInput!
+  requestedDeliveryDate: Date
+}
+
+type SubmittedOrder {
+  appId: UUID4
+  cart: Cart
+  cartId: UUID4
+
+  """
+  Composite Order Ids will be in the format `customer_po-internal_order_id`. If
+  the customer PO field is null, it'll just be the `internal_order_id`
+  """
+  compositeId: String @deprecated(reason: "The display_name field now represents the user visible order identifier/label\nwhich is either explicitly set in the record or computed via the composite\norder id logic. This obviates the need for the composite_id field.\n")
+  contactInfo: ContactInfo!
+  createdOrderSubscriptions: [OrderSubscription!]!
+  currencyCode: String
+
+  """User's own internal id for the order"""
+  customerPo: String
+
+  """
+  The display name represents the user visible order label which identifies
+  the order to an end-user. This is either explicitly set in the
+  display_name_override column on the order or is computed as a composite of
+  the purchase order id (if any) and the internal order id.
+  """
+  displayName: String
+  externalOrderId: String @deprecated(reason: "The concept of internal/external order ids is\nbeing removed and this will be replaced by a\nsingle field.\n")
+  fulfillmentSystemOrderId: String
+  fulfillmentSystemStatus: String
+  fulfillments: [Fulfillment!]
+  gifteeEmail: String
+  gifteeMessage: String
+  giftorName: String
+  id: UUID4!
+  internalOrderId: Int! @deprecated(reason: "The concept of internal/external order ids is\nbeing removed and this will be replaced by a\nsingle field.\n")
+
+  """
+  Some orders are managed or "owned" by a different system. These orders are
+  sometimes imported into this system for tracking and reporting purposes but
+  don't have active workflows or fulfillment processes hooked up. This allows
+  these orders to be displayed with special notices in the UI.
+  """
+  isExternalOrder: Boolean
+  isGift: Boolean
+  location: LatLong
+  orderSubscription: OrderSubscription
+  orderSubscriptionRelationship: OrderSubscriptionRelationshipNames!
+  paymentInfo: PaymentInfo
+  paymentRequest: PaymentRequest
+  price: Price!
+  requestedDeliveryDate: Date
+  status: String
+  submittedAt: DateTime
+  user: User
+}
+
+type SubmittedOrderPayload {
+  pagination: PaginationData!
+  submittedOrders: [SubmittedOrder!]!
+}
+
+enum SubscriptionOption {
+  ALLOWED
+  NONE
+  ONLY
+}
+
+"""Contains information about the price of a subscription."""
+type SubscriptionPrice {
+  """Shipping cost of the subscription."""
+  shipping: Int!
+
+  """SubTotal of the subscription."""
+  subtotal: Int!
+
+  """Total amount of tax applied to the subscription."""
+  tax: Int!
+
+  """Total of the subscription."""
+  total: Int!
+}
+
+type Survey {
+  activityId: String!
+  activityTags: [String]
+  dateEnd: String
+  dateStart: String
+  description: String
+  displayPoints: Int
+  extraData: Json
+  imageUrl: String
+  isEnabled: Boolean
+  numPoints: Int
+  otherLabel: String
+  questions: [Question]!
+  singleSubmit: Boolean
+  title: String
+}
+
+input SurveyAnswer {
+  other: String
+  questionId: Int!
+  selectedAnswers: [Int]
+  textAnswer: String
+}
+
+type SurveyResponse {
+  surveyResponse: [QuestionResponse]!
+}
+
+input SurveyResponseInput {
+  pepdirectActivityId: String!
+  surveyResponse: [SurveyAnswer]!
+}
+
+type SurveySubmissionResponse {
+  message: String
+  pointsAwarded: Int
+  totalResponses: Int
+}
+
+type TaxItem {
+  amount: Int
+  calculatedTax: Int
+  description: String
+  exempt: Int
+  impositionTypeId: Int
+  impositionValue: String
+  jurisdiction: String
+  jurisdictionType: String
+  taxRuleId: String
+  unclaimedTaxes: Int
+}
+
+type Tenant {
+  analyticsConfig: AnalyticsConfig!
+  appId: UUID4! @deprecated(reason: "Deprecated in favor of `id`.")
+  botProtection: BotProtection!
+  brandConfig: BrandConfig!
+  capabilities: Capabilities!
+  checkout: Checkout
+  contactConfig: ContactConfig!
+  countryCode: String!
+  domain: String!
+  fallbackUrl: String! @deprecated(reason: "Deprecated in favor of `store_url`.")
+  giftCardConfig: GiftCardConfig!
+  giftConfig: GiftConfig!
+  id: UUID4!
+  loyaltyConfig: LoyaltyConfig!
+  paymentConfig: PaymentConfig!
+  shippingConfig: ShippingConfig!
+  shoppingBagConfig: ShoppingBagConfig!
+  storeUrl: String!
+  userExperience: UserExperience!
+}
+
+type TenantPaymentOptions {
+  defaultCurrencyCode: String!
+  merchantAccountId: String
+}
+
+type TenantShippingOptions {
+  shippingMethodsEnabled: Boolean
+}
+
+type Tier {
+  amount: Int!
+  minQty: Int!
+  type: TierType!
+}
+
+type TieredAttributes {
+  tiers: [Tier!]!
+}
+
+type TieredBehaviour {
+  attributes: TieredAttributes!
+  name: BehaviourEnum!
+}
+
+enum TierType {
+  """The tier discounts a flat amount"""
+  FLAT
+
+  """the tier dicounts a percentage amount"""
+  PERCENT
+}
+
+type TrackingNumber {
+  carrierName: String
+  trackingNumber: String
+  trackingServiceUpdatedAt: NaiveDateTime
+  trackingUrl: String
+}
+
+input UniqueCartItemInput {
+  analyticsDetails: Json
+  cartItemId: UUID4!
+  customizations: Json
+  id: UUID4
+  merchandiseId: String
+  quantity: Int!
+  subscriptionIntervalInDays: Int
+}
+
+input UpdateCreditCardDefaultInput {
+  default: Boolean!
+  token: String!
+}
+
+input UpdateItemWithUniqueCustomizationsInput {
+  analyticsDetails: Json
+  cartItemId: UUID4!
+  customizations: Json
+  id: UUID4!
+  quantity: Int!
+  subscriptionIntervalInDays: Int
+}
+
+input UpdateOrderInput {
+  contactInfo: ContactInfoInput
+
+  """Field size should not exceed 25 characters"""
+  customerPo: String
+  gifteeEmail: String
+  gifteeMessage: String
+  giftorName: String
+  isGift: Boolean
+  paymentRequest: PaymentRequestInput
+  requestedDeliveryDate: Date
+}
+
+input UpdateOrderSubscriptionAddressInput {
+  addressId: UUID4!
+
+  """ID of Order Subscription"""
+  id: UUID4!
+}
+
+input UpdateOrderSubscriptionInput {
+  id: UUID4!
+  intervalInDays: Int
+  title: String
+}
+
+input UpdateOrderSubscriptionPaymentInput {
+  """ID of Order Subscription"""
+  id: UUID4!
+  paymentOptions: PaymentOptionsInput
+}
+
+input UpdateOrderSubscriptionQuantityInput {
+  orderSubscriptionItemId: UUID4!
+  quantity: Int!
+}
+
+input UpdateOrderSubscriptionStatusInput {
+  """ID of Order Subscription"""
+  id: UUID4!
+  status: OrderSubscriptionStatusNames!
+
+  """This field is required if status is PAUSED or CANCELED"""
+  statusReason: String
+}
+
+input UpdatePaymentMethodDefaultInput {
+  default: Boolean!
+  token: String!
+}
+
+"""Inputs for updating user's first and last name."""
+input UpdateUserFirstLastNameInput {
+  firstName: String!
+  id: UUID4!
+  lastName: String!
+}
+
+type User {
+  acceptedTermsAt: DateTime
+  addresses: [Address!]!
+  admin: Boolean! @deprecated(reason: "Legacy admin has been disabled, this field is now always false.")
+  appId: UUID4!
+  cart: Cart
+  dateOfBirth: Date
+  email: String!
+  firstName: String
+  hashedEmail: String!
+  hfName: String
+  hlName: String
+  id: UUID4!
+  insertedAt: DateTime!
+  lastLoggedIn: DateTime
+  lastName: String
+  paymentMethods: PaymentMethods
+  registrationRecords: [RegistrationRecord!]!
+  userString: String
+  vendorConfig: Tenant!
+}
+
+type UserActivity {
+  activityId: String
+  date: DateTime
+  displayName: String
+  extraData: Json
+  freqCap: Int
+  freqPeriodId: Int
+  freqPeriodName: String
+  imgUrl: String
+  internalName: String
+  numPoints: Int
+  userNumCompletions: Int
+}
+
+type UserActivityHistory {
+  activities: [UserActivity]
+  redemptions: [UserActivity]
+}
+
+input UserAddressInput {
+  city: String!
+  company: String
+  countryCode: String!
+  firstName: String!
+  isDefault: Boolean
+  isRemovable: Boolean
+  lastName: String!
+  line1: String!
+  line2: String
+  nickname: String
+  phoneNumber: String
+  specialInstructions: String
+  state: String
+  validated: Boolean
+  zip: String!
+}
+
+input UserAddressIsDefaultInput {
+  isDefault: Boolean!
+}
+
+input UserCodeSubmitInput {
+  campaignId: String!
+  codeValue: String!
+}
+
+type UserExperience {
+  hasRequestedDeliveryDate: Boolean!
+}
+
+type UserPasswordResetRequestPayload {
+  email: String!
+}
+
+type UserProfile {
+  customData: Json
+  firstName: String
+  isActive: Boolean
+  lastName: String
+  redeemablePoints: Int
+  referralCode: String
+  totalPoints: Int
+}
+
+input UserProfileInput {
+  mailingAddress: MailingAddressInput
+  nflMarketingOptIn: Boolean
+  nflSweepsOptIn: Boolean
+  nflTeam: String
+  sweepstakesAddress: MailingAddressInput
+  sweepstakesOptin: Boolean!
+}
+
+type UtmData {
+  campaign: String
+  content: String
+  medium: String
+  source: String
+  term: String
+}
+
+input UtmDataInput {
+  campaign: String
+  content: String
+  medium: String
+  source: String
+  term: String
+}
+
+"""The `UUID4` scalar type."""
+scalar UUID4
+
+type ValidateZipcodePayload {
+  restrictedItems: [Item!]!
+}
+
+enum ValidationRequirement {
+  ALWAYS
+  OPTIONAL
+}
+
+type VerifyAddressError {
+  code: String
+  field: String
+  message: String
+  suggestion: String
+}
+
+input VerifyAddressInput {
+  city: String!
+  company: String
+  countryCode: String!
+  firstName: String!
+  lastName: String!
+  line1: String!
+  line2: String
+  specialInstructions: String
+  state: String
+  zip: String!
+}
+
+type VerifyAddressPayload {
+  city: String!
+  company: String
+  countryCode: String!
+  errors: [VerifyAddressError!]
+  firstName: String!
+  lastName: String!
+  line1: String!
+  line2: String
+  specialInstructions: String
+  state: String
+  success: Boolean
+  zip: String!
+}
+
+type VirtualItemsInCartLocalizations {
+  cartText: String!
+  itemHeadingText: String!
+  itemNoteText: String!
+}
+
+type ZipCodeRestrictionLocalizations {
+  itemHeadingText: String!
+  itemNoteText: String!
+}

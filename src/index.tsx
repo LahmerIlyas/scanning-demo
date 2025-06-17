@@ -5,7 +5,7 @@ import {
 import { MainNavigator } from '@/navigation';
 import { ApolloProvider } from '@apollo/client/react';
 import { client } from '@/client';
-import { AuthContextProvider } from '@/context/Auth';
+import { AuthContextProvider } from './context/Auth';
 
 export function App() {
   return (

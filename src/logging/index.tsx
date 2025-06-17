@@ -1,21 +1,12 @@
-import {
-  addBreadcrumb,
-  captureException,
-  captureMessage,
-  init,
-  withScope,
-  setUser,
-} from '@sentry/react-native';
-import type { Scope } from '@sentry/react-native';
+
 import Config from 'react-native-config';
 import DeviceInfo from 'react-native-device-info';
 
-export type Extras = Parameters<InstanceType<typeof Scope>['setExtras']>[0];
 
 const logToConsole = (
   context: string | undefined,
   error: string | Error,
-  extras?: Extras,
+  extras?: any,
 ): void => {
   if (__DEV__) {
     console.log(
@@ -29,64 +20,27 @@ const sentryRelease = () => {
 };
 
 const setUp = (): void => {
-  init({
-    autoInitializeNativeSdk: true,
-    debug: true,
-    dist: DeviceInfo.getBuildNumber(),
-    dsn: Config.SENTRY_DSN,
-    environment: Config.ENVIRONMENT,
-    enableNative: true,
-    enableNativeCrashHandling: true,
-    release: sentryRelease(),
-  });
+
 };
 
-const logEvent = (message: string, extras?: Extras): void => {
-  withScope((scope): void => {
-    scope.setLevel('info');
-    if (extras) {
-      scope.setExtras(extras);
-    }
-    captureMessage(message);
-  });
+const logEvent = (message: string, extras?: any): void => {
+
 };
 
-const logError = (error: Error, extras?: Extras): void => {
-  if (__DEV__) {
-    logToConsole(undefined, error as string | Error, extras);
-    return;
-  }
-  withScope((scope): void => {
-    scope.setLevel('error');
-    if (extras) {
-      scope.setExtras(extras);
-    }
-    captureException(error);
-  });
+const logError = (error: Error, extras?: any): void => {
+
 };
 
 const logNavigation = (
   routeName: string,
   params?: { [name: string]: string } | undefined,
-  extras?: Extras,
+  extras?: any,
 ): void => {
-  withScope((scope): void => {
-    if (extras) {
-      scope.setExtras(extras);
-    }
-    addBreadcrumb({
-      category: 'navigation',
-      data: { params, routeName },
-      level: 'info',
-      message: `navigated to ${routeName}`,
-    });
-  });
+
 };
 
 const setUserId = (id: string | undefined): void => {
-  setUser({
-    id,
-  });
+
 };
 
 export const logInfo: typeof console.log = (

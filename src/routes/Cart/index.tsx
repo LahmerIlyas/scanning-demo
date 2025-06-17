@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import Animated, {LinearTransition} from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {useNavigation} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -144,10 +143,10 @@ export function CartRoute() {
             </View>
 
             {cart.items.map((item, index) => (
-              <Animated.View
+              <View
                 key={item.id}
                 style={styles.cartItemWrapper}
-                layout={LinearTransition}>
+                >
                 <CartItemCard
                   title={item.item.title || ''}
                   description={item.item.brandName || ''}
@@ -177,11 +176,11 @@ export function CartRoute() {
                     />
                   </View>
                 )}
-              </Animated.View>
+              </View>
             ))}
           </ScrollView>
 
-          <Animated.View style={styles.footer}>
+          <View style={styles.footer}>
             <View style={styles.footerContent}>
               <View style={styles.orderSummary}>
                 <Text style={styles.summaryTitle}>
@@ -248,7 +247,7 @@ export function CartRoute() {
               )}
             </View>
             <View style={{height: insets.bottom}} />
-          </Animated.View>
+          </View>
         </>
       )}
     </View>

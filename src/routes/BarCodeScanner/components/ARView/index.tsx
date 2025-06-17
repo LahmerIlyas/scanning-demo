@@ -18,6 +18,9 @@ import { client } from '@/client';
 import { ApolloProvider } from '@apollo/client';
 import { mergeProductData } from '@/utils/merge-product-data';
 import { formatPrice } from '@/utils/price';
+import NavigationService from '@/navigation/service';
+import { useNavigation } from '@react-navigation/native';
+import { emitViewAlternatives } from '@/events';
 
 // The component must be registered and must either have a static and instance property `moduleName` by
 // which it's registered, or must inherit from `BarcodeTrackingAdvancedOverlayView`.
@@ -59,7 +62,7 @@ const ARViewUi = ({barCode}: {barCode: string}) => {
 
   if(mappedProduct.type === 'non-pepsico') {
     return (
-      <ARViewCompetitor />
+      <ARViewCompetitor barCode={barCode} />
     );
   }
 
@@ -83,25 +86,23 @@ const ARViewUi = ({barCode}: {barCode: string}) => {
   </View>  )
 }
 
-class ARViewCompetitor extends React.Component {
-  state = { showBarcodeData: false };
-
-  render() {
-    const { stock } = this.props;
-
+const ARViewCompetitor  = ({barCode}: {barCode: string}) => {
     return (
-      <TouchableWithoutFeedback>
+      <View>
         <View style={styles.lookingForBetterValueBubbleContentContainer}>
           <View style={styles.lookingForBetterValueBubbleContent}>
             <Text style={styles.arBubbleHeader} numberOfLines={2}>Looking for better value?</Text>
-            <Pressable style={styles.viewAlternativesButton}>
+            <Pressable style={styles.viewAlternativesButton} onPress={() => {
+              // publish event
+              console.log('view alternatives');
+              emitViewAlternatives(barCode)
+            }}>
               <Text style={styles.viewAlternativesButtonText}>View Alternatives</Text>
             </Pressable>
           </View>
         </View>
-      </TouchableWithoutFeedback>
+      </View>
     );
-  }
 }
 
  class ARViewLoading extends React.Component  {

@@ -27,6 +27,7 @@ import { requestCameraPermissionsIfNeeded } from './camera-permission-handler';
 import Freeze from './Freeze.svg';
 import { styles } from './styles';
 import Unfreeze from './Unfreeze.svg';
+import { event, events } from '@/events';
 
 // Calculate the width of a quadrilateral (barcode location) based on it's corners.
 Quadrilateral.prototype.width = function() {
@@ -35,6 +36,7 @@ Quadrilateral.prototype.width = function() {
     Math.abs(this.bottomRight.x - this.bottomLeft.x),
   );
 };
+
 
 export class BarCodeScannerRoute extends Component {
   constructor(props) {
@@ -48,6 +50,13 @@ export class BarCodeScannerRoute extends Component {
 
     this.trackedBarcodes = {};
     this.state = { scanning: true };
+
+    const eventListener = event.addListener(events.navigation.viewAlternatives, (barcode) => {
+      console.log('view alternatives');
+      this.props.navigation.navigate('BarCodeScannerQuickAddToCart', {
+        id: barcode.id,
+      });
+    });
   }
 
   componentDidMount() {

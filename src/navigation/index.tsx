@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, NavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { HomeRoute } from '@/routes/Home';
 import { CartRoute } from '@/routes/Cart';
@@ -20,6 +20,7 @@ import { createLocale } from '@/locales';
 import { BarCodeScannerRoute } from '../routes/BarCodeScanner';
 import { View } from 'react-native';
 import { BarCodeScannerQuickAddToCartRoute } from '@/routes/BarCodeScannerQuickAddToCart';
+import NavigationService from './service';
 
 const Tab = createBottomTabNavigator();
 
@@ -113,10 +114,10 @@ function RootStack() {
           <Stack.Screen
             name="BarCodeScannerQuickAddToCart"
             component={BarCodeScannerQuickAddToCartRoute}
+            
             options={{
-              presentation: 'formSheet',
-              headerShown: false,
-              sheetAllowedDetents: [0.5],
+              title: "Alternatives",
+              presentation: 'modal',
             }}
           />
           <Stack.Screen
@@ -150,8 +151,16 @@ function RootStack() {
 }
 
 export function MainNavigator() {
+  const navigationRef = React.useRef<NavigationContainerRef | null>(null);
+
+  const handleNavigationRef = (ref: NavigationContainerRef | null): void => {
+    navigationRef.current = ref;
+    NavigationService.setTopLevelNavigator(ref);
+  };
+
+
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={handleNavigationRef}>
       <RootStack />
     </NavigationContainer>
   );

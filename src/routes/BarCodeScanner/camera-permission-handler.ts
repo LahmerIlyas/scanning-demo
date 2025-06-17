@@ -1,4 +1,4 @@
-import { PermissionsAndroid, Platform } from 'react-native';
+import { PermissionsAndroid, Platform, EventEmitter } from 'react-native';
 
 const isAndroidMarshmallowOrNewer =
   Platform.OS === 'android' && Platform.Version >= 23;
